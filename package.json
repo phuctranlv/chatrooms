@@ -1,0 +1,43 @@
+{
+  "name": "chatrooms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phuctranlv/chatrooms.git"
+  },
+  "author": "Phuc Tran",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phuctranlv/chatrooms/issues"
+  },
+  "homepage": "https://github.com/phuctranlv/chatrooms#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "body-parser": "^1.19.0",
+    "cassandra-driver": "^4.5.2",
+    "express": "^4.17.1",
+    "faker": "^4.1.0",
+    "morgan": "^1.10.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "babel-loader": "^8.1.0",
+    "css-loader": "^3.5.3",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.20.0",
+    "eslint-plugin-react-hooks": "^2.5.1",
+    "nodemon": "^2.0.4",
+    "webpack": "^4.43.0"
+  }
+}
