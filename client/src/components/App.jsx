@@ -1,36 +1,40 @@
+/* eslint-disable class-methods-use-this */
 import React from 'react';
-import styles from '../styles/App.css';
-
-const socket = io();
-const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      socket: io(),
+      socketInfo: Qs.parse(window.location.search, { ignoreQueryPrefix: true }),
       message: '',
       messages: [],
       room: '',
       users: [],
       listening: false,
       speakButton: '',
-      recognition: ''
-    }
+      recognition: window.SpeechRecognition
+        ? new window.SpeechRecognition()
+        : new window.webkitSpeechRecognition()
+    };
     this.onSubmitHandler = this.onSubmitHandler.bind(this);
     this.onChangeHandler = this.onChangeHandler.bind(this);
     this.autoScroll = this.autoScroll.bind(this);
     this.onSpeakHandler = this.onSpeakHandler.bind(this);
 
-    socket.emit('join', { username, room }, (error) => {
+    const { socket, socketInfo } = this.state;
+
+    socket.emit('join', socketInfo, (error) => {
       if (error) {
-        alert(error);
-        location.href = '/';
-      };
+        window.alert(error);
+        window.location.href = '/';
+      }
     });
 
     socket.on('message', (message) => {
+      const { messages } = this.state;
       this.setState({
-        messages: [...this.state.messages, {
+        messages: [...messages, {
           username: message.username,
           createdAt: moment(message.createdAt).format('h:mm a'),
           message: message.text
@@ -39,43 +43,43 @@ class App extends React.Component {
       this.autoScroll();
     });
 
-    socket.on('roomData', ({ room, users }) => {
-      this.setState({ room, users })
-    })
+    socket.on('roomData', ({ room, users }) => this.setState({ room, users }));
   }
 
+
   componentDidMount() {
-    this.state.speakButton = document.getElementById('speakButton');
+    const promise = new Promise((resolve) => {
+      resolve(true);
+      this.setState({ speakButton: document.getElementById('speakButton') });
+    });
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (typeof SpeechRecognition !== "undefined") {
-      this.state.recognition = new SpeechRecognition();
-
+    promise.then(() => {
+      const { speakButton, recognition, socket } = this.state;
       const stop = () => {
-        this.state.recognition.stop();
-        this.state.speakButton.textContent = "Start speech";
-        this.state.speakButton.classList.remove("speaking")
-        this.setState({ listening: false })
+        recognition.stop();
+        speakButton.textContent = 'Start speech';
+        speakButton.classList.remove('speaking');
+        this.setState({ listening: false });
       };
 
       const start = () => {
-        this.state.recognition.start();
-        this.state.speakButton.textContent = "Stop speech";
-        this.state.speakButton.classList.add("speaking")
-        this.setState({ listening: true })
+        recognition.start();
+        speakButton.textContent = 'Stop speech';
+        speakButton.classList.add('speaking');
+        this.setState({ listening: true });
       };
 
       const onResult = (event) => {
-        let speechToText = ''
+        let speechToText = '';
 
         for (const res of event.results) {
-          speechToText = speechToText + res[0].transcript + ' ';
+          speechToText = `${speechToText + res[0].transcript} `;
 
           if (res.isFinal) {
-            socket.emit('sendMessage', speechToText, (message) => {
-              message ? console.log(message) : console.log('The message was delivered successfully!');
-            })
+            socket.emit('sendMessage', speechToText, (message) => (
+              message
+                ? console.log(message)
+                : console.log('The message was delivered successfully!')));
             speechToText = '';
           }
         }
@@ -83,20 +87,22 @@ class App extends React.Component {
         stop();
       };
 
-      this.state.recognition.continuous = false;
-      this.state.recognition.interimResults = false;
-      this.state.recognition.addEventListener("result", onResult);
-      this.state.speakButton.addEventListener("click", event => {
-        this.state.listening ? stop() : start();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.addEventListener('result', onResult);
+      speakButton.addEventListener('click', () => {
+        const { listening } = this.state;
+        return listening ? stop() : start();
       });
-    }
+    });
   }
 
   onChangeHandler(event) {
-    this.setState({ message: event.target.value })
+    this.setState({ message: event.target.value });
   }
 
   onSubmitHandler(event) {
+    const { message, socket } = this.state;
     event.preventDefault();
 
     const formInput = event.target[0];
@@ -104,13 +110,13 @@ class App extends React.Component {
 
     submitButton.setAttribute('disabled', 'disabled');
 
-    socket.emit('sendMessage', this.state.message, (message) => {
+    socket.emit('sendMessage', message, (msg) => {
       submitButton.removeAttribute('disabled');
       formInput.focus();
-      message ? console.log(message) : console.log('The message was delivered successfully!');
-    })
+      return msg ? console.log(msg) : console.log('The message was delivered successfully!');
+    });
 
-    this.setState({ message: '' })
+    this.setState({ message: '' });
   }
 
   onSpeakHandler(event) {
@@ -122,7 +128,7 @@ class App extends React.Component {
     const $newMessage = $messages[0].lastElementChild;
     // height of new message:
     const newMessageStyle = getComputedStyle($newMessage);
-    const newMessageMargin = parseInt(newMessageStyle.marginBottom);
+    const newMessageMargin = parseInt(newMessageStyle.marginBottom, 10);
     const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
     // visible height:
     const visibleHeight = $messages[0].offsetHeight;
@@ -136,32 +142,34 @@ class App extends React.Component {
   }
 
   render() {
+    const {
+      users, messages, message, room
+    } = this.state;
+
     return (
       <div className="chat">
         <div className="chat__sidebar">
           <h2 className="room-title">
             <p>Chat room:</p>
-            <p>{this.state.room}</p>
+            <p>{room}</p>
           </h2>
           <h3 className="list-title">Users:</h3>
           <ul className="users">
-            {this.state.users.map((user) => <li>{user.username}</li>)}
+            {users.map((user) => <li>{user.username}</li>)}
           </ul>
         </div>
         <div className="chat__main">
           <div className="chat__messages">
             {
-              this.state.messages.map(message => {
-                return (
-                  <div className="message">
-                    <p>
-                      <span className="message__name">{message.username}</span>
-                      <span className="message__meta">{message.createdAt}</span>
-                    </p>
-                    <p>{message.message}</p>
-                  </div>
-                )
-              })
+              messages.map((msg) => (
+                <div className="message">
+                  <p>
+                    <span className="message__name">{msg.username}</span>
+                    <span className="message__meta">{msg.createdAt}</span>
+                  </p>
+                  <p>{msg.message}</p>
+                </div>
+              ))
             }
           </div>
           <div className="compose">
@@ -169,20 +177,20 @@ class App extends React.Component {
               <input
                 type="text"
                 placeholder="Type text here"
-                value={this.state.message}
+                value={message}
                 onChange={this.onChangeHandler}
                 required
                 autoComplete="off"
               />
-              <button>Submit text</button>
+              <button type="submit">Submit text</button>
             </form>
             <form onSubmit={this.onSpeakHandler}>
-              <button id="speakButton">Start speech</button>
+              <button id="speakButton" type="submit">Start speech</button>
             </form>
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
 
