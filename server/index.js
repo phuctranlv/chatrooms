@@ -39,6 +39,27 @@ io.on('connection', (socket) => {
     cb()
   })
 
+  socket.on('sendMessage', (message, cb) => {
+    const user = getUser(socket.id);
+
+    const filter = new Filter();
+
+    io.to(user.room).emit('message', generateMessage(user.username, message));
+    
+    if (filter.isProfane(message)) {
+      cb('Profanity is detected...')
+    } else {
+      cb()
+    }
+  });
+
+  socket.on('sendLocation', (location, cb) => {
+    const user = getUser(socket.id);
+
+    io.to(user.room).emit('locationMessage', generateLocationMessage(user.username, location.lat, location.long));
+
+    cb();
+  })
 
   socket.on('disconnect', () => {
     const user = removeUser(socket.id);
