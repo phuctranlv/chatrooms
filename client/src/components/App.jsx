@@ -12,7 +12,10 @@ class App extends React.Component {
       message: '',
       messages: [],
       room: '',
-      users: []
+      users: [],
+      listening: false,
+      speakButton: '',
+      recognition: ''
     }
     this.onSubmitHandler =  this.onSubmitHandler.bind(this);
     this.onChangeHandler = this.onChangeHandler.bind(this);
@@ -56,6 +59,55 @@ class App extends React.Component {
     })
   }
 
+  componentDidMount() {
+    this.state.speakButton = document.getElementById('speakButton');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (typeof SpeechRecognition !== "undefined") {
+      this.state.recognition = new SpeechRecognition();
+      const stop = () => {
+        this.state.recognition.stop();
+        this.state.speakButton.textContent = "Start speech";
+        this.state.speakButton.classList.remove("speaking")
+        this.setState({
+          listening: false
+        })
+      };
+      const start = () => {
+        this.state.recognition.start();
+        this.state.speakButton.textContent = "Stop speed";
+        this.state.speakButton.classList.add("speaking")
+        this.setState({
+          listening: true
+        })
+      };
+      const onResult = (event) => {
+        let speechToText = ''
+        for (const res of event.results) {
+          speechToText = speechToText + res[0].transcript + ' ';
+          if (res.isFinal) {
+            socket.emit('sendMessage', speechToText, (message) => {
+              if (message) {
+                console.log(message);
+              } else {
+                console.log('The message was delivered successfully!');
+              }
+            })
+            speechToText = '';
+          }
+        }
+        stop();
+      };
+      this.state.recognition.continuous = false;
+      this.state.recognition.interimResults = false;
+      this.state.recognition.addEventListener("result", onResult);
+      this.state.speakButton.addEventListener("click", event => {
+        this.state.listening ? stop() : start();
+      });
+    }
+  }
+
   onChangeHandler(event) {
     this.setState({
       message: event.target.value
@@ -84,6 +136,11 @@ class App extends React.Component {
     this.setState({
       message: ''
     })
+  }
+
+  onSpeakHandler(event) {
+    event.preventDefault();
+
   }
 
   onSubmitLocationHandler(event) {
@@ -200,16 +257,16 @@ class App extends React.Component {
             <form onSubmit={this.onSubmitHandler}>
               <input
                 type="text"
-                placeholder="Enter your message here" 
+                placeholder="Type text here" 
                 value={this.state.message} 
                 onChange={this.onChangeHandler} 
                 required
                 autoComplete="off"
               />
-              <button>Submit</button>
+              <button>Submit text</button>
             </form>
-            <form onSubmit={this.onSubmitLocationHandler}>
-              <button>Send location</button>
+            <form onSubmit={(event) => event.preventDefault()}>
+              <button id="speakButton">Start speech</button>
             </form>
           </div>
         </div>

@@ -180,3 +180,21 @@ button:disabled {
     font-weight: 300;
     padding: 12px 24px 0 24px;
 }
+
+@keyframes bg-pulse {
+    0% {
+        background-color: #fff;
+    }
+
+    50% {
+        background-color: #c7ecee;
+    }
+
+    100% {
+        background-color: #fff;
+    }
+}
+
+.speaking {
+    animation: bg-pulse 1.5s alternate ease-in-out infinite;
+}
