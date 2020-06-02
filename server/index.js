@@ -11,7 +11,7 @@ const { addUser, removeUser, getUser, getUsersInRoom} = require('./utilities/use
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
-const port = 3000;
+const port = process.env.PORT || '0.0.0.0' || 3000;
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
