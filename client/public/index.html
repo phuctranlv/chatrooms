@@ -3,10 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta name="author" value="Phuc Tran">
-    <title>Chatrooms</title>
+    <title>Join the chat</title>
+    <link rel="icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/styles.css">
   </head>
+
   <body>
-    <div id="app"></div>
-    <script src="./bundle.js"></script>
+    <div class="centered-form">
+      <div class="centered-form__box">
+        <h1>Join</h1>
+        <form action="/chat.html">
+          <label>Display name</label>
+          <input type="text" name="username" placeholder="Display name" required />
+          <label>Room</label>
+          <input type="text" name="room" placeholder="Room" required/>
+          <button class="button" type="submit" value="Join">Join</button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
