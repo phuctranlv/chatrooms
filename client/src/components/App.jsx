@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable class-methods-use-this */
 import React from 'react';
 
@@ -7,6 +9,7 @@ class App extends React.Component {
     this.state = {
       socket: io(),
       socketInfo: Qs.parse(window.location.search, { ignoreQueryPrefix: true }),
+      currentPhrase: 0,
       message: '',
       messages: [],
       room: '',
@@ -60,36 +63,43 @@ class App extends React.Component {
         recognition.stop();
         speakButton.textContent = '🎙';
         speakButton.classList.remove('speaking');
-        this.setState({ listening: false });
+        this.setState({ listening: false, currentPhrase: 0 });
       };
 
       const start = () => {
         recognition.start();
         speakButton.textContent = 'Stop speech';
         speakButton.classList.add('speaking');
-        this.setState({ listening: true });
+        this.setState({ listening: true, currentPhrase: 0 });
       };
 
       const onResult = (event) => {
         let speechToText = '';
 
-        for (const res of event.results) {
-          speechToText = `${speechToText + res[0].transcript} `;
+        const speechUpdatePromise = new Promise((resolve) => {
+          const { currentPhrase } = this.state;
+          const arrayOfSpeech = Array.from((event.results));
 
-          if (res.isFinal) {
-            socket.emit('sendMessage', speechToText, (message) => (
-              message
-                ? console.log(message)
-                : console.log('The message was delivered successfully!')));
-            speechToText = '';
+          for (let i = currentPhrase; i < arrayOfSpeech.length; i += 1) {
+            speechToText = `${speechToText + arrayOfSpeech[i][0].transcript} `;
+            if (arrayOfSpeech[i].isFinal && i === arrayOfSpeech.length - 1) {
+              this.setState({ currentPhrase: i + 1 });
+              resolve(true);
+            }
           }
-        }
+        });
 
-        stop();
+        speechUpdatePromise.then(() => {
+          socket.emit('sendMessage', speechToText, (message) => (
+            message
+              ? console.log(message)
+              : console.log('The message was delivered successfully!')));
+          speechToText = '';
+        });
       };
 
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.continuous = true;
+      recognition.interimResults = true;
       recognition.addEventListener('result', onResult);
       speakButton.addEventListener('click', () => {
         const { listening } = this.state;
