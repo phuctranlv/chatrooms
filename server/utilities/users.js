@@ -7,42 +7,50 @@ const addUser = ({ id, username, room }) => {
   if (!username || !room) {
     return {
       error: 'Username and room are required'
-    }
+    };
   }
 
-  const existingUsers = users.find((user) => {
-    return user.room === room && user.username === username
-  });
+  const existingUsers = users.find((user) => user.room === room && user.username === username);
 
   if (existingUsers) {
     return {
       error: 'Username for this room is already in used!'
-    }
+    };
   }
 
-  const user = { id, username, room };
+  const user = {
+    id,
+    username,
+    room,
+    recording: false,
+    typing: false
+  };
+
   users.push(user);
-  return { user }
-}
+  return { user };
+};
 
 const removeUser = (id) => {
   const index = users.findIndex((user) => user.id === id);
   if (index !== -1) {
     return users.splice(index, 1)[0];
   }
-}
+  return undefined;
+};
 
-const getUser = (id) => {
-  return users.find((user) => user.id === id);
-}
+const getUser = (id) => users.find((user) => user.id === id);
 
-const getUsersInRoom = (room) => {
-  return users.filter((user) => user.room === room);
-}
+const getUsersInRoom = (room) => users.filter((user) => user.room === room);
+
+const updateUser = (id, activity, status) => {
+  const user = getUser(id);
+  user[activity] = status;
+};
 
 module.exports = {
   addUser,
   removeUser,
   getUser,
-  getUsersInRoom
-}
+  getUsersInRoom,
+  updateUser
+};
