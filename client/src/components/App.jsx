@@ -21,6 +21,7 @@ class App extends React.Component {
     this.onChangeHandler = this.onChangeHandler.bind(this);
     this.autoScroll = this.autoScroll.bind(this);
     this.onSpeakHandler = this.onSpeakHandler.bind(this);
+    this.onClickTextToSpeech = this.onClickTextToSpeech.bind(this);
 
     const { socket, socketInfo } = this.state;
 
@@ -57,7 +58,7 @@ class App extends React.Component {
       const { speakButton, recognition, socket } = this.state;
       const stop = () => {
         recognition.stop();
-        speakButton.textContent = 'Start speech';
+        speakButton.textContent = '🎙';
         speakButton.classList.remove('speaking');
         this.setState({ listening: false });
       };
@@ -123,6 +124,12 @@ class App extends React.Component {
     event.preventDefault();
   }
 
+  onClickTextToSpeech(event) {
+    const toSay = event.target.textContent.trim();
+    const utterance = new SpeechSynthesisUtterance(toSay);
+    speechSynthesis.speak(utterance);
+  }
+
   autoScroll() {
     const $messages = document.getElementsByClassName('chat__messages');
     const $newMessage = $messages[0].lastElementChild;
@@ -161,15 +168,25 @@ class App extends React.Component {
         <div className="chat__main">
           <div className="chat__messages">
             {
-              messages.map((msg) => (
-                <div className="message">
-                  <p>
-                    <span className="message__name">{msg.username}</span>
-                    <span className="message__meta">{msg.createdAt}</span>
+              messages.map((msg) => {
+                const messageText = (
+                  <p
+                    className="message__text"
+                    onClick={this.onClickTextToSpeech}
+                  >
+                    {msg.message}
                   </p>
-                  <p>{msg.message}</p>
-                </div>
-              ))
+                );
+                return (
+                  <div className="message">
+                    <p>
+                      <span className="message__name">{msg.username}</span>
+                      <span className="message__meta">{msg.createdAt}</span>
+                    </p>
+                    {messageText}
+                  </div>
+                );
+              })
             }
           </div>
           <div className="compose">
@@ -185,7 +202,7 @@ class App extends React.Component {
               <button type="submit">Submit text</button>
             </form>
             <form onSubmit={this.onSpeakHandler}>
-              <button id="speakButton" type="submit">Start speech</button>
+              <button id="speakButton" type="submit">🎙</button>
             </form>
           </div>
         </div>
