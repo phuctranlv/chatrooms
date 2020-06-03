@@ -84,16 +84,27 @@ button:disabled {
 
 /* Chat Page Layout */
 
+.topbar {
+    background: rgb(63, 64, 68);
+    height: 10vh;
+    display: flex;
+    font-size: 35px;
+    color: rgb(80, 172, 239);
+    align-items: center;
+    padding-left: 35px;
+}
+
 .chat {
     display: flex;
 }
 
 .chat__sidebar {
-    height: 100vh;
+    height: 90vh;
     color: white;
     background: #333744;
-    width: 225px;
-    overflow-y: scroll
+    min-width: 225px;
+    overflow-y: scroll;
+    box-shadow: 4px 2px 5px black;
 }
 
 /* Chat styles */
@@ -102,7 +113,7 @@ button:disabled {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    max-height: 100vh;
+    max-height: 90vh;
 }
 
 .chat__messages {
@@ -119,7 +130,7 @@ button:disabled {
 
 .message__name {
     font-weight: 600;
-    font-size: 20px;
+    font-size: 25px;
     margin-right: 8px;
 }
 
@@ -148,7 +159,7 @@ button:disabled {
 }
 
 .compose input {
-    border: 1px solid #eeeeee;
+    border: 3px solid #eeeeee;
     width: 100%;
     padding: 12px;
     margin: 0 16px 0 0;
@@ -165,7 +176,7 @@ button:disabled {
     font-weight: 400;
     font-size: 22px;
     background: #2c2f3a;
-    padding: 24px;   
+    padding: 24px;
 }
 
 .list-title {

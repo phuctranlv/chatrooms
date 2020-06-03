@@ -161,8 +161,18 @@ class App extends React.Component {
   }
 
   onClickTextToSpeech(event) {
+    const theElement = event.target;
     const toSay = event.target.textContent.trim();
     const utterance = new SpeechSynthesisUtterance(toSay);
+
+    utterance.addEventListener('start', () => {
+      theElement.classList.add('speaking');
+    });
+
+    utterance.addEventListener('end', () => {
+      theElement.addEventListener('animationiteration', () => theElement.classList.remove('speaking'), { once: true });
+    });
+
     speechSynthesis.speak(utterance);
   }
 
@@ -190,93 +200,96 @@ class App extends React.Component {
     } = this.state;
 
     return (
-      <div className="chat">
-        <div className="chat__sidebar">
-          <h2 className="room-title">
-            <p>Chat room:</p>
-            <p>{room}</p>
-          </h2>
-          <h3 className="list-title">Users:</h3>
-          <ul className="users">
-            {users.map((user) => {
-              if (user.recording) {
-                return (
-                  <li>
-                    {`${user.username} `}
-                    <span role="img" aria-labelledby="speaking"> 🗣</span>
-                  </li>
-                );
-              }
-              if (user.typing) {
-                return (
-                  <li>
-                    {`${user.username} `}
-                    <span role="img" aria-labelledby="typing">💬</span>
-                  </li>
-                );
-              }
-              return <li>{user.username}</li>;
-            })}
-          </ul>
-        </div>
-        <div className="chat__main">
-          <div className="chat__messages">
-            {
-              messages.map((msg, index) => {
-                let messageText;
-                if (index >= 1 && msg.username === messages[index - 1].username) {
-                  messageText = (
-                    <div>
-                      <p
-                        className="message__text"
-                        onClick={this.onClickTextToSpeech}
-                      >
-                        {msg.message}
-                      </p>
-                    </div>
-                  );
-                } else {
-                  messageText = (
-                    <div>
-                      <p>
-                        <span className="message__name">{msg.username}</span>
-                        <span className="message__meta">{msg.createdAt}</span>
-                      </p>
-                      <p
-                        className="message__text"
-                        onClick={this.onClickTextToSpeech}
-                      >
-                        {msg.message}
-                      </p>
-                    </div>
+      <div>
+        <div className="topbar">Demo for & ava</div>
+        <div className="chat">
+          <div className="chat__sidebar">
+            <h2 className="room-title">
+              <p style={{ 'text-align': 'center' }}>Chat room:</p>
+              <p style={{ 'text-align': 'center' }}>{room}</p>
+            </h2>
+            <h3 className="list-title">Users:</h3>
+            <ul className="users">
+              {users.map((user) => {
+                if (user.recording) {
+                  return (
+                    <li>
+                      {`${user.username} `}
+                      <span role="img" aria-labelledby="speaking"> 🗣</span>
+                    </li>
                   );
                 }
-                return (
-                  <div
-                    className="message"
-                    style={{ color: `${msg.color}` }}
-                  >
-                    {messageText}
-                  </div>
-                );
-              })
-            }
+                if (user.typing) {
+                  return (
+                    <li>
+                      {`${user.username} `}
+                      <span role="img" aria-labelledby="typing">💬</span>
+                    </li>
+                  );
+                }
+                return <li style={{ color: `${user.color}` }}>{user.username}</li>;
+              })}
+            </ul>
           </div>
-          <div className="compose">
-            <form onSubmit={this.onSubmitHandler}>
-              <input
-                type="text"
-                placeholder="Type text here"
-                value={message}
-                onChange={this.onChangeHandler}
-                required
-                autoComplete="off"
-              />
-              <button type="submit">Submit text</button>
-            </form>
-            <form onSubmit={this.onSpeakHandler}>
-              <button id="speakButton" type="submit">🎙</button>
-            </form>
+          <div className="chat__main">
+            <div className="chat__messages">
+              {
+                messages.map((msg, index) => {
+                  let messageText;
+                  if (index >= 1 && msg.username === messages[index - 1].username) {
+                    messageText = (
+                      <div>
+                        <p
+                          className="message__text"
+                          onClick={this.onClickTextToSpeech}
+                        >
+                          {msg.message}
+                        </p>
+                      </div>
+                    );
+                  } else {
+                    messageText = (
+                      <div>
+                        <p>
+                          <span className="message__name">{msg.username}</span>
+                          <span className="message__meta">{msg.createdAt}</span>
+                        </p>
+                        <p
+                          className="message__text"
+                          onClick={this.onClickTextToSpeech}
+                        >
+                          {msg.message}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div
+                      className="message"
+                      style={{ color: `${msg.color}` }}
+                    >
+                      {messageText}
+                    </div>
+                  );
+                })
+              }
+            </div>
+            <div className="compose">
+              <form onSubmit={this.onSubmitHandler}>
+                <input
+                  type="text"
+                  placeholder="Type text here"
+                  value={message}
+                  onChange={this.onChangeHandler}
+                  required
+                  autoComplete="off"
+                />
+                <button type="submit">Submit text</button>
+              </form>
+              <form onSubmit={this.onSpeakHandler}>
+                <button id="speakButton" type="submit">🎙</button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
