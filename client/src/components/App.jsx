@@ -95,10 +95,8 @@ class App extends React.Component {
             speechToText = `${speechToText + arrayOfSpeech[i][0].transcript} `;
           }
 
-          if (arrayOfSpeech[i - 1].isFinal) {
-            this.setState({ currentPhrase: i });
-            resolve(true);
-          }
+          this.setState({ currentPhrase: i });
+          resolve(true);
         });
 
         speechUpdatePromise.then(() => {
