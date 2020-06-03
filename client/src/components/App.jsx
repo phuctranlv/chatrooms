@@ -42,7 +42,8 @@ class App extends React.Component {
         messages: [...messages, {
           username: message.username,
           createdAt: moment(message.createdAt).format('h:mm a'),
-          message: message.text
+          message: message.text,
+          color: message.color
         }]
       });
       this.autoScroll();
@@ -251,7 +252,12 @@ class App extends React.Component {
                   );
                 }
                 return (
-                  <div className="message">{messageText}</div>
+                  <div
+                    className="message"
+                    style={{ color: `${msg.color}` }}
+                  >
+                    {messageText}
+                  </div>
                 );
               })
             }

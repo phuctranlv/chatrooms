@@ -18,12 +18,19 @@ const addUser = ({ id, username, room }) => {
     };
   }
 
+  const color = {
+    r: Math.floor(Math.random() * 256),
+    g: Math.floor(Math.random() * 256),
+    b: Math.floor(Math.random() * 256)
+  };
+
   const user = {
     id,
     username,
     room,
     recording: false,
-    typing: false
+    typing: false,
+    color: `rgb(${color.r},${color.g},${color.b})`
   };
 
   users.push(user);

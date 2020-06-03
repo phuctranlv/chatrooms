@@ -31,8 +31,8 @@ io.on('connection', (socket) => {
 
     socket.join(user.room);
 
-    socket.emit('message', generateMessage('Admin', `Welcome ${user.username}!`));
-    socket.broadcast.to(user.room).emit('message', generateMessage('Admin',`${user.username} has joined!`));
+    socket.emit('message', generateMessage('Admin', user, `Welcome ${user.username}!`));
+    socket.broadcast.to(user.room).emit('message', generateMessage('Admin', user, `${user.username} has joined!`));
     io.to(user.room).emit('roomData', {
       room: user.room,
       users: getUsersInRoom(user.room)
@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
 
     const filter = new Filter();
 
-    io.to(user.room).emit('message', generateMessage(user.username, message));
+    io.to(user.room).emit('message', generateMessage(user.username, user, message));
 
     if (filter.isProfane(message)) {
       cb('Profanity is detected...');
@@ -81,7 +81,7 @@ io.on('connection', (socket) => {
     const user = removeUser(socket.id);
 
     if (user) {
-      io.to(user.room).emit('message', generateMessage('Admin', `${user.username} has left!`));
+      io.to(user.room).emit('message', generateMessage('Admin', user, `${user.username} has left!`));
       io.to(user.room).emit('roomData', {
         room: user.room,
         users: getUsersInRoom(user.room)
