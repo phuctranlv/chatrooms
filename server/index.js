@@ -4,7 +4,6 @@ const socketio = require('socket.io');
 const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const Filter = require('bad-words');
 const { generateMessage } = require('./utilities/messages');
 const {
   addUser, removeUser, getUser, getUsersInRoom, updateUser
@@ -44,15 +43,9 @@ io.on('connection', (socket) => {
   socket.on('sendMessage', (message, cb) => {
     const user = getUser(socket.id);
 
-    const filter = new Filter();
-
     io.to(user.room).emit('message', generateMessage(user.username, user, message));
 
-    if (filter.isProfane(message)) {
-      cb('Profanity is detected...');
-    } else {
-      cb();
-    }
+    cb();
   });
 
   socket.on('recording', (recording) => {
