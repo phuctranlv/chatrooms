@@ -5,9 +5,9 @@ const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const Filter = require('bad-words');
-const { generateMessage, generateLocationMessage } = require('./utilities/messages');
+const { generateMessage } = require('./utilities/messages');
 const {
-  addUser, removeUser, getUser, getUsersInRoom
+  addUser, removeUser, getUser, getUsersInRoom, updateUser
 } = require('./utilities/users');
 
 const app = express();
@@ -55,12 +55,26 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('sendLocation', (location, cb) => {
+  socket.on('recording', (recording) => {
     const user = getUser(socket.id);
 
-    io.to(user.room).emit('locationMessage', generateLocationMessage(user.username, location.lat, location.long));
+    updateUser(user.id, 'recording', recording);
 
-    cb();
+    io.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUsersInRoom(user.room)
+    });
+  });
+
+  socket.on('typing', (typing) => {
+    const user = getUser(socket.id);
+
+    updateUser(user.id, 'typing', typing);
+
+    io.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUsersInRoom(user.room)
+    });
   });
 
   socket.on('disconnect', () => {
