@@ -4,7 +4,7 @@ const socketio = require('socket.io');
 const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const { generateMessage } = require('./utilities/messages');
+const { generateMessage, getMessages } = require('./utilities/messages');
 const {
   addUser, removeUser, getUser, getUsersInRoom, updateUser
 } = require('./utilities/users');
@@ -30,8 +30,12 @@ io.on('connection', (socket) => {
 
     socket.join(user.room);
 
-    socket.emit('message', generateMessage('Admin', user, `Welcome ${user.username}!`));
+    const chatsInRoom = getMessages(user.room);
+
+    socket.emit('welcomeMessage', generateMessage('Admin', user, `Welcome ${user.username}!`), chatsInRoom);
+
     socket.broadcast.to(user.room).emit('message', generateMessage('Admin', user, `${user.username} has joined!`));
+
     io.to(user.room).emit('roomData', {
       room: user.room,
       users: getUsersInRoom(user.room)

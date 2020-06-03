@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable class-methods-use-this */
@@ -36,13 +37,51 @@ class App extends React.Component {
       }
     });
 
+    socket.on('welcomeMessage', (message, chats) => {
+      let seperateMessage;
+      if (chats.length === 0) {
+        seperateMessage = {
+          username: '',
+          createdAt: '',
+          message: '',
+          color: message.color
+        };
+      } else {
+        seperateMessage = {
+          username: 'Older messages',
+          createdAt: '',
+          message: '-----------------------------------------------------------------------------',
+          color: message.color
+        };
+      }
+      const promise = new Promise((resolve) => {
+        this.setState({
+          messages: [
+            ...chats,
+            seperateMessage,
+            {
+              username: message.username,
+              createdAt: message.createdAt,
+              message: message.message,
+              color: message.color
+            }
+          ]
+        });
+        resolve(true);
+      });
+      promise.then(() => {
+        const $messages = document.getElementsByClassName('chat__messages');
+        $messages[0].scrollTop = $messages[0].scrollHeight;
+      });
+    });
+
     socket.on('message', (message) => {
       const { messages } = this.state;
       this.setState({
         messages: [...messages, {
           username: message.username,
-          createdAt: moment(message.createdAt).format('h:mm a'),
-          message: message.text,
+          createdAt: message.createdAt,
+          message: message.message,
           color: message.color
         }]
       });
@@ -234,6 +273,7 @@ class App extends React.Component {
               {
                 messages.map((msg, index) => {
                   let messageText;
+                  if (msg.username === '') return;
                   if (index >= 1 && msg.username === messages[index - 1].username) {
                     messageText = (
                       <div>
