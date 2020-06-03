@@ -14,7 +14,8 @@ class App extends React.Component {
       messages: [],
       room: '',
       users: [],
-      listening: false,
+      recording: false,
+      typing: false,
       speakButton: '',
       recognition: window.SpeechRecognition
         ? new window.SpeechRecognition()
@@ -58,19 +59,27 @@ class App extends React.Component {
     });
 
     promise.then(() => {
-      const { speakButton, recognition, socket } = this.state;
+      const { speakButton, recognition } = this.state;
       const stop = () => {
         recognition.stop();
         speakButton.textContent = '🎙';
         speakButton.classList.remove('speaking');
-        this.setState({ listening: false, currentPhrase: 0 });
+        this.setState(() => {
+          const { socket } = this.state;
+          socket.emit('recording', false);
+          return { recording: false, currentPhrase: 0 };
+        });
       };
 
       const start = () => {
         recognition.start();
         speakButton.textContent = 'Stop speech';
         speakButton.classList.add('speaking');
-        this.setState({ listening: true, currentPhrase: 0 });
+        this.setState(() => {
+          const { socket } = this.state;
+          socket.emit('recording', true);
+          return { recording: true, currentPhrase: 0 };
+        });
       };
 
       const onResult = (event) => {
@@ -92,6 +101,7 @@ class App extends React.Component {
         });
 
         speechUpdatePromise.then(() => {
+          const { socket } = this.state;
           socket.emit('sendMessage', speechToText, (message) => (
             message
               ? console.log(message)
@@ -104,14 +114,25 @@ class App extends React.Component {
       recognition.interimResults = true;
       recognition.addEventListener('result', onResult);
       speakButton.addEventListener('click', () => {
-        const { listening } = this.state;
-        return listening ? stop() : start();
+        const { recording } = this.state;
+        return recording ? stop() : start();
       });
     });
   }
 
   onChangeHandler(event) {
-    this.setState({ message: event.target.value });
+    const typingPromise = new Promise((resolve) => {
+      this.setState({ message: event.target.value });
+      resolve(true);
+    });
+    typingPromise.then(() => {
+      const { socket, message } = this.state;
+      if (message !== '') {
+        socket.emit('typing', true);
+      } else {
+        socket.emit('typing', false);
+      }
+    });
   }
 
   onSubmitHandler(event) {
@@ -128,6 +149,8 @@ class App extends React.Component {
       formInput.focus();
       return msg ? console.log(msg) : console.log('The message was delivered successfully!');
     });
+
+    socket.emit('typing', false);
 
     this.setState({ message: '' });
   }
@@ -174,7 +197,25 @@ class App extends React.Component {
           </h2>
           <h3 className="list-title">Users:</h3>
           <ul className="users">
-            {users.map((user) => <li>{user.username}</li>)}
+            {users.map((user) => {
+              if (user.recording) {
+                return (
+                  <li>
+                    {`${user.username} `}
+                    <span role="img" aria-labelledby="speaking"> 🗣</span>
+                  </li>
+                );
+              }
+              if (user.typing) {
+                return (
+                  <li>
+                    {`${user.username} `}
+                    <span role="img" aria-labelledby="typing">💬</span>
+                  </li>
+                );
+              }
+              return <li>{user.username}</li>;
+            })}
           </ul>
         </div>
         <div className="chat__main">
