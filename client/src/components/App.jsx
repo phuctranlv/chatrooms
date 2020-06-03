@@ -79,13 +79,15 @@ class App extends React.Component {
         const speechUpdatePromise = new Promise((resolve) => {
           const { currentPhrase } = this.state;
           const arrayOfSpeech = Array.from((event.results));
+          let i = 0;
 
-          for (let i = currentPhrase; i < arrayOfSpeech.length; i += 1) {
+          for (i = currentPhrase; i < arrayOfSpeech.length; i += 1) {
             speechToText = `${speechToText + arrayOfSpeech[i][0].transcript} `;
-            if (arrayOfSpeech[i].isFinal && i === arrayOfSpeech.length - 1) {
-              this.setState({ currentPhrase: i + 1 });
-              resolve(true);
-            }
+          }
+
+          if (arrayOfSpeech[i - 1].isFinal) {
+            this.setState({ currentPhrase: i });
+            resolve(true);
           }
         });
 
@@ -178,23 +180,37 @@ class App extends React.Component {
         <div className="chat__main">
           <div className="chat__messages">
             {
-              messages.map((msg) => {
-                const messageText = (
-                  <p
-                    className="message__text"
-                    onClick={this.onClickTextToSpeech}
-                  >
-                    {msg.message}
-                  </p>
-                );
+              messages.map((msg, index) => {
+                let messageText;
+                if (index >= 1 && msg.username === messages[index - 1].username) {
+                  messageText = (
+                    <div>
+                      <p
+                        className="message__text"
+                        onClick={this.onClickTextToSpeech}
+                      >
+                        {msg.message}
+                      </p>
+                    </div>
+                  );
+                } else {
+                  messageText = (
+                    <div>
+                      <p>
+                        <span className="message__name">{msg.username}</span>
+                        <span className="message__meta">{msg.createdAt}</span>
+                      </p>
+                      <p
+                        className="message__text"
+                        onClick={this.onClickTextToSpeech}
+                      >
+                        {msg.message}
+                      </p>
+                    </div>
+                  );
+                }
                 return (
-                  <div className="message">
-                    <p>
-                      <span className="message__name">{msg.username}</span>
-                      <span className="message__meta">{msg.createdAt}</span>
-                    </p>
-                    {messageText}
-                  </div>
+                  <div className="message">{messageText}</div>
                 );
               })
             }
