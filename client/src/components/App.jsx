@@ -134,8 +134,10 @@ class App extends React.Component {
             speechToText = `${speechToText + arrayOfSpeech[i][0].transcript} `;
           }
 
-          this.setState({ currentPhrase: i });
-          resolve(true);
+          if (arrayOfSpeech[i - 1].isFinal) {
+            this.setState({ currentPhrase: i });
+            resolve(true);
+          }
         });
 
         speechUpdatePromise.then(() => {
@@ -242,15 +244,15 @@ class App extends React.Component {
         <div className="chat">
           <div className="chat__sidebar">
             <h2 className="room-title">
-              <p style={{ 'text-align': 'center' }}>Chat room:</p>
-              <p style={{ 'text-align': 'center' }}>{room}</p>
+              <p style={{ 'text-align': 'center', 'font-size': '35px' }}>Chat room:</p>
+              <p style={{ 'text-align': 'center', 'font-size': '24px' }}>{room}</p>
             </h2>
             <h3 className="list-title">Users:</h3>
             <ul className="users">
               {users.map((user) => {
                 if (user.recording) {
                   return (
-                    <li>
+                    <li style={{ 'font-size': '24px' }}>
                       {`${user.username} `}
                       <span role="img" aria-labelledby="speaking"> 🗣</span>
                     </li>
