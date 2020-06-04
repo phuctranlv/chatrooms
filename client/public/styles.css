@@ -103,6 +103,7 @@ button:disabled {
     color: white;
     background: #333744;
     flex: 1;
+    min-width: 150px;
     overflow-y: scroll;
     box-shadow: 4px 2px 5px black;
 }
