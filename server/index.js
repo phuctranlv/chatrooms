@@ -49,6 +49,7 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', ({ userId, text }, cb) => {
     const user = getUser(userId);
+    if (!user) return;
 
     io.to(user.room).emit('message', generateMessage(user.username, userId, user, text));
 
@@ -57,6 +58,7 @@ io.on('connection', (socket) => {
 
   socket.on('recording', ({ userId, recording }) => {
     const user = getUser(userId);
+    if (!user) return;
 
     updateUser(userId, 'recording', recording);
 
@@ -68,6 +70,7 @@ io.on('connection', (socket) => {
 
   socket.on('typing', ({ userId, typing }) => {
     const user = getUser(userId);
+    if (!user) return;
 
     updateUser(userId, 'typing', typing);
 
