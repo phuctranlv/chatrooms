@@ -40,27 +40,10 @@ class MessagePage extends React.Component {
     });
 
     socket.on('welcomeMessage', (message, chats) => {
-      let seperateMessage;
-      if (chats.length === 0) {
-        seperateMessage = {
-          username: '',
-          createdAt: '',
-          message: '',
-          color: message.color
-        };
-      } else {
-        seperateMessage = {
-          username: 'Older messages above this line',
-          createdAt: '',
-          message: '-------------------------------------------------------',
-          color: message.color
-        };
-      }
       const promise = new Promise((resolve) => {
         this.setState({
           messages: [
             ...chats,
-            seperateMessage,
             {
               username: message.username,
               createdAt: message.createdAt,
@@ -278,15 +261,42 @@ class MessagePage extends React.Component {
                 messages.map((msg, index) => {
                   let messageText;
                   if (msg.username === '') return;
-                  if (index >= 1 && msg.username === messages[index - 1].username) {
+                  if (msg.username === 'Admin') {
                     messageText = (
                       <div>
-                        <p
-                          className="message__text"
-                          onClick={this.onClickTextToSpeech}
-                        >
+                        <p>
+                          <span className="message__name">{msg.username}</span>
+                          <span className="message__meta">{msg.createdAt}</span>
+                        </p>
+                        <p className="message__text">
                           {msg.message}
                         </p>
+                      </div>
+                    );
+                  } else if (index >= 1 && msg.username === messages[index - 1].username) {
+                    messageText = (
+                      <div
+                        style={{ display: 'flex' }}
+                      >
+                        <textarea
+                          className="message__text"
+                          rows="5"
+                          cols="50"
+                          wrap="soft"
+                          style={{ 'font-size': '25px', color: `${msg.color}` }}
+                        >
+                          {msg.message}
+                        </textarea>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}
+                        >
+                          <input type="submit" value="⭐️" />
+                          <input type="submit" value="💾" />
+                          <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
+                          <input type="submit" value="❌" />
+                        </div>
                       </div>
                     );
                   } else {
