@@ -4,7 +4,7 @@
 /* eslint-disable class-methods-use-this */
 import React from 'react';
 
-class MessagePage extends React.Component {
+class MessagesPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -367,4 +367,4 @@ class MessagePage extends React.Component {
   }
 }
 
-export default MessagePage;
+export default MessagesPage;

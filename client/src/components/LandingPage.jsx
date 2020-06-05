@@ -66,7 +66,7 @@ class LandingPage extends React.Component {
                 'align-items': 'center'
               }}
             >
-              Click anywhere on the page to join the conversations!
+              Click anywhere on the page to log-in and join the conversations!
             </div>
           </div>
         </div>
