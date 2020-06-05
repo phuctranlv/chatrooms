@@ -200,8 +200,8 @@ class MessagePage extends React.Component {
   }
 
   onClickTextToSpeech(event) {
-    const theElement = event.target;
-    const toSay = event.target.textContent.trim();
+    const theElement = event.target.parentNode.parentNode.firstChild;
+    const toSay = event.target.parentNode.parentNode.firstChild.textContent.trim();
     const utterance = new SpeechSynthesisUtterance(toSay);
 
     utterance.addEventListener('start', () => {
@@ -294,12 +294,29 @@ class MessagePage extends React.Component {
                           <span className="message__name">{msg.username}</span>
                           <span className="message__meta">{msg.createdAt}</span>
                         </p>
-                        <p
-                          className="message__text"
-                          onClick={this.onClickTextToSpeech}
+                        <div
+                          style={{ display: 'flex' }}
                         >
-                          {msg.message}
-                        </p>
+                          <textarea
+                            className="message__text"
+                            rows="5"
+                            cols="50"
+                            wrap="soft"
+                            style={{ 'font-size': '25px', color: `${msg.color}` }}
+                          >
+                            {msg.message}
+                          </textarea>
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                          >
+                            <input type="submit" value="⭐️" />
+                            <input type="submit" value="💾" />
+                            <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
+                            <input type="submit" value="❌" />
+                          </div>
+                        </div>
                       </div>
                     );
                   }
@@ -318,16 +335,16 @@ class MessagePage extends React.Component {
               <form onSubmit={this.onSubmitHandler}>
                 <input
                   type="text"
-                  placeholder="Type text here"
+                  placeholder="Type new conversation here"
                   value={message}
                   onChange={this.onChangeHandler}
                   required
                   autoComplete="off"
                 />
-                <button type="submit">Submit text</button>
+                <button type="submit">Submit new conversation ✉️</button>
               </form>
               <form onSubmit={this.onSpeakHandler}>
-                <button id="speakButton" type="submit">🎙</button>
+                <button id="speakButton" type="submit">Speech-to-text 🎙</button>
               </form>
             </div>
           </div>
