@@ -12,10 +12,9 @@ const addUser = ({ id, username, room }) => {
 
   const existingUsers = users.find((user) => user.room === room && user.username === username);
 
-  if (existingUsers) {
-    return {
-      error: 'Username for this room is already in used!'
-    };
+  if (existingUsers !== undefined) {
+    existingUsers.id = id;
+    return { user: existingUsers };
   }
 
   const color = {

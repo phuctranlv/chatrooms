@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { generateMessage, getMessages } = require('./utilities/messages');
 const {
-  addUser, removeUser, getUser, getUsersInRoom, updateUser
+  addUser, getUser, getUsersInRoom, updateUser
 } = require('./utilities/users');
 const router = require('./router');
 
@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    const user = removeUser(socket.id);
+    const user = getUser(socket.id);
 
     if (user) {
       io.to(user.room).emit('message', generateMessage('Admin', user, `${user.username} has left!`));
