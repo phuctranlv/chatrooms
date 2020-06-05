@@ -1,13 +1,14 @@
-const moment = require('moment');
-
 const chats = {};
 
 const generateMessage = (username, user, text) => {
+  const createdAt = new Date().getTime();
   const message = {
     username,
     text,
-    createdAt: moment(new Date().getTime()).format('h:mm a'),
-    color: user.color
+    createdAt,
+    color: user.color,
+    conversationId: user.userId + createdAt,
+    mutations: []
   };
 
   const { room } = user;

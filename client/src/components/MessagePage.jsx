@@ -260,13 +260,14 @@ class MessagePage extends React.Component {
               {
                 messages.map((msg, index) => {
                   let messageText;
+                  const time = moment(msg.createdAt).format('h:mm a')
                   if (msg.username === '') return;
                   if (msg.username === 'Admin') {
                     messageText = (
                       <div>
                         <p>
                           <span className="message__name">{msg.username}</span>
-                          <span className="message__meta">{msg.createdAt}</span>
+                          <span className="message__meta">{time}</span>
                         </p>
                         <p className="message__text">
                           {msg.text}
@@ -304,7 +305,7 @@ class MessagePage extends React.Component {
                       <div>
                         <p>
                           <span className="message__name">{msg.username}</span>
-                          <span className="message__meta">{msg.createdAt}</span>
+                          <span className="message__meta">{time}</span>
                         </p>
                         <div
                           style={{ display: 'flex' }}
