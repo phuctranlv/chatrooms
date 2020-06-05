@@ -47,10 +47,10 @@ io.on('connection', (socket) => {
     cb();
   });
 
-  socket.on('sendMessage', ({ userId, message }, cb) => {
+  socket.on('sendMessage', ({ userId, text }, cb) => {
     const user = getUser(userId);
 
-    io.to(user.room).emit('message', generateMessage(user.username, user, message));
+    io.to(user.room).emit('message', generateMessage(user.username, user, text));
 
     cb();
   });

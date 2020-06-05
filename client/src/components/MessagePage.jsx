@@ -47,7 +47,7 @@ class MessagePage extends React.Component {
             {
               username: message.username,
               createdAt: message.createdAt,
-              message: message.message,
+              text: message.text,
               color: message.color
             }
           ]
@@ -66,7 +66,7 @@ class MessagePage extends React.Component {
         messages: [...messages, {
           username: message.username,
           createdAt: message.createdAt,
-          message: message.message,
+          text: message.text,
           color: message.color
         }]
       });
@@ -127,7 +127,7 @@ class MessagePage extends React.Component {
 
         speechUpdatePromise.then(() => {
           const { socket, userId } = this.state;
-          socket.emit('sendMessage', { userId, message: speechToText }, (message) => (
+          socket.emit('sendMessage', { userId, text: speechToText }, (message) => (
             message
               ? console.log(message)
               : console.log('The message was delivered successfully!')));
@@ -169,7 +169,7 @@ class MessagePage extends React.Component {
 
     submitButton.setAttribute('disabled', 'disabled');
 
-    socket.emit('sendMessage', { userId, message }, (msg) => {
+    socket.emit('sendMessage', { userId, text: message }, (msg) => {
       submitButton.removeAttribute('disabled');
       formInput.focus();
       return msg ? console.log(msg) : console.log('The message was delivered successfully!');
@@ -269,7 +269,7 @@ class MessagePage extends React.Component {
                           <span className="message__meta">{msg.createdAt}</span>
                         </p>
                         <p className="message__text">
-                          {msg.message}
+                          {msg.text}
                         </p>
                       </div>
                     );
@@ -285,7 +285,7 @@ class MessagePage extends React.Component {
                           wrap="soft"
                           style={{ 'font-size': '25px', color: `${msg.color}` }}
                         >
-                          {msg.message}
+                          {msg.text}
                         </textarea>
                         <div style={{
                           display: 'flex',
@@ -316,7 +316,7 @@ class MessagePage extends React.Component {
                             wrap="soft"
                             style={{ 'font-size': '25px', color: `${msg.color}` }}
                           >
-                            {msg.message}
+                            {msg.text}
                           </textarea>
                           <div style={{
                             display: 'flex',

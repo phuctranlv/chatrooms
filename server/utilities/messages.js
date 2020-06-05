@@ -5,7 +5,7 @@ const chats = {};
 const generateMessage = (username, user, text) => {
   const message = {
     username,
-    message: text,
+    text,
     createdAt: moment(new Date().getTime()).format('h:mm a'),
     color: user.color
   };
@@ -16,7 +16,6 @@ const generateMessage = (username, user, text) => {
   } else if (username !== 'Admin') {
     chats[room].push(message);
   }
-
   return message;
 };
 
