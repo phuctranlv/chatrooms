@@ -85,6 +85,7 @@ button:disabled {
 .topbar {
     background: rgb(63, 64, 68);
     height: 10vh;
+    width: 100%;
     display: flex;
     font-size: 35px;
     color: rgb(80, 172, 239);
