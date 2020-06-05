@@ -1,14 +1,15 @@
 const chats = {};
 
-const generateMessage = (username, user, text) => {
+const generateMessage = (username, userId, user, text) => {
   const createdAt = new Date().getTime();
   const message = {
     username,
     text,
     createdAt,
     color: user.color,
-    conversationId: user.userId + createdAt,
-    mutations: []
+    id: `${userId}${createdAt}`,
+    mutations: [],
+    lastMutation: {}
   };
 
   const { room } = user;
@@ -23,6 +24,13 @@ const generateMessage = (username, user, text) => {
 const getMessages = (room) => {
   if (chats[room]) {
     return chats[room];
+  } if (room === 'all') {
+    const chatRooms = Object.values(chats);
+    const conversations = [];
+    for (let i = 0; i < chatRooms.length; i += 1) {
+      conversations.push(...chatRooms[i]);
+    }
+    return conversations;
   }
   return [];
 };

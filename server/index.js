@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
   console.log('New WebSocket connection');
 
   socket.on('join', ({ username, room }, cb) => {
-    const { error, user } = addUser({ socketId: socket.id, userId: username + room, username, room });
+    const { error, user } = addUser({ socketId: socket.id, userId: `${username}${room}`, username, room });
 
     if (error) return cb(error);
 
@@ -35,9 +35,9 @@ io.on('connection', (socket) => {
 
     const chatsInRoom = getMessages(user.room);
 
-    socket.emit('welcomeMessage', generateMessage('Admin', user, `Welcome ${user.username}!`), chatsInRoom);
+    socket.emit('welcomeMessage', generateMessage('Admin', 1, user, `Welcome ${user.username}!`), chatsInRoom);
 
-    socket.broadcast.to(user.room).emit('message', generateMessage('Admin', user, `${user.username} has joined!`));
+    socket.broadcast.to(user.room).emit('message', generateMessage('Admin', 1, user, `${user.username} has joined!`));
 
     io.to(user.room).emit('roomData', {
       room: user.room,
@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
   socket.on('sendMessage', ({ userId, text }, cb) => {
     const user = getUser(userId);
 
-    io.to(user.room).emit('message', generateMessage(user.username, user, text));
+    io.to(user.room).emit('message', generateMessage(user.username, userId, user, text));
 
     cb();
   });
@@ -81,7 +81,7 @@ io.on('connection', (socket) => {
     const user = getUserBySocketId(socket.id);
 
     if (user) {
-      io.to(user.room).emit('message', generateMessage('Admin', user, `${user.username} has left!`));
+      io.to(user.room).emit('message', generateMessage('Admin', 1, user, `${user.username} has left!`));
       io.to(user.room).emit('roomData', {
         room: user.room,
         users: getUsersInRoom(user.room)
