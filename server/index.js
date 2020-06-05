@@ -8,6 +8,7 @@ const { generateMessage, getMessages } = require('./utilities/messages');
 const {
   addUser, removeUser, getUser, getUsersInRoom, updateUser
 } = require('./utilities/users');
+const router = require('./router');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +20,8 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.resolve(__dirname, '../client/public')));
+app.use(router);
+
 
 io.on('connection', (socket) => {
   console.log('New WebSocket connection');
