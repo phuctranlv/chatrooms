@@ -1,4 +1,4 @@
-const users = [];
+const users = {};
 
 const addUser = ({ socketId, userId, username, room }) => {
   username = username.trim().toLowerCase();
@@ -10,7 +10,7 @@ const addUser = ({ socketId, userId, username, room }) => {
     };
   }
 
-  const existingUsers = users.find((user) => user.room === room && user.username === username);
+  const existingUsers = users[userId];
 
   if (existingUsers !== undefined) {
     existingUsers.socketId = socketId;
@@ -25,7 +25,6 @@ const addUser = ({ socketId, userId, username, room }) => {
 
   const user = {
     socketId,
-    userId: username + room,
     username,
     room,
     recording: false,
@@ -33,15 +32,19 @@ const addUser = ({ socketId, userId, username, room }) => {
     color: `rgb(${color.r},${color.g},${color.b})`
   };
 
-  users.push(user);
+  users[userId] = (user);
   return { user };
 };
 
-const getUser = (userId) => users.find((user) => user.userId === userId);
+const getUser = (userId) => users[userId];
 
-const getUserBySocketId = (socketId) => users.find((user) => user.socketId === socketId);
+const getUserBySocketId = (socketId) => (
+  Object.values(users).find((user) => user.socketId === socketId)
+);
 
-const getUsersInRoom = (room) => users.filter((user) => user.room === room);
+const getUsersInRoom = (room) => (
+  Object.values(users).filter((user) => user.room === room)
+);
 
 const updateUser = (userId, activity, status) => {
   const user = getUser(userId);
