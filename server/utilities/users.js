@@ -1,6 +1,6 @@
 const users = [];
 
-const addUser = ({ id, username, room }) => {
+const addUser = ({ socketId, userId, username, room }) => {
   username = username.trim().toLowerCase();
   room = room.trim().toLowerCase();
 
@@ -13,7 +13,7 @@ const addUser = ({ id, username, room }) => {
   const existingUsers = users.find((user) => user.room === room && user.username === username);
 
   if (existingUsers !== undefined) {
-    existingUsers.id = id;
+    existingUsers.socketId = socketId;
     return { user: existingUsers };
   }
 
@@ -24,7 +24,8 @@ const addUser = ({ id, username, room }) => {
   };
 
   const user = {
-    id,
+    socketId,
+    userId: username + room,
     username,
     room,
     recording: false,
@@ -36,26 +37,20 @@ const addUser = ({ id, username, room }) => {
   return { user };
 };
 
-const removeUser = (id) => {
-  const index = users.findIndex((user) => user.id === id);
-  if (index !== -1) {
-    return users.splice(index, 1)[0];
-  }
-  return undefined;
-};
+const getUser = (userId) => users.find((user) => user.userId === userId);
 
-const getUser = (id) => users.find((user) => user.id === id);
+const getUserBySocketId = (socketId) => users.find((user) => user.socketId === socketId);
 
 const getUsersInRoom = (room) => users.filter((user) => user.room === room);
 
-const updateUser = (id, activity, status) => {
-  const user = getUser(id);
+const updateUser = (userId, activity, status) => {
+  const user = getUser(userId);
   user[activity] = status;
 };
 
 module.exports = {
+  getUserBySocketId,
   addUser,
-  removeUser,
   getUser,
   getUsersInRoom,
   updateUser

@@ -14,6 +14,7 @@ class MessagePage extends React.Component {
       message: '',
       messages: [],
       room: '',
+      userId: '',
       users: [],
       recording: false,
       typing: false,
@@ -31,6 +32,7 @@ class MessagePage extends React.Component {
     const { socket, socketInfo } = this.state;
 
     socket.emit('join', socketInfo, (error) => {
+      this.setState({ userId: socketInfo.username + socketInfo.room });
       if (error) {
         window.alert(error);
         window.location.href = '/';
@@ -48,9 +50,9 @@ class MessagePage extends React.Component {
         };
       } else {
         seperateMessage = {
-          username: 'Older messages',
+          username: 'Older messages above this line',
           createdAt: '',
-          message: '-----------------------------------------------------------------------------',
+          message: '-------------------------------------------------------',
           color: message.color
         };
       }
@@ -105,8 +107,8 @@ class MessagePage extends React.Component {
         speakButton.textContent = '🎙';
         speakButton.classList.remove('speaking');
         this.setState(() => {
-          const { socket } = this.state;
-          socket.emit('recording', false);
+          const { socket, userId } = this.state;
+          socket.emit('recording', { userId, recording: false });
           return { recording: false, currentPhrase: 0 };
         });
       };
@@ -116,8 +118,8 @@ class MessagePage extends React.Component {
         speakButton.textContent = 'Stop speech';
         speakButton.classList.add('speaking');
         this.setState(() => {
-          const { socket } = this.state;
-          socket.emit('recording', true);
+          const { socket, userId } = this.state;
+          socket.emit('recording', { userId, recording: true });
           return { recording: true, currentPhrase: 0 };
         });
       };
@@ -141,8 +143,8 @@ class MessagePage extends React.Component {
         });
 
         speechUpdatePromise.then(() => {
-          const { socket } = this.state;
-          socket.emit('sendMessage', speechToText, (message) => (
+          const { socket, userId } = this.state;
+          socket.emit('sendMessage', { userId, message: speechToText }, (message) => (
             message
               ? console.log(message)
               : console.log('The message was delivered successfully!')));
@@ -166,17 +168,17 @@ class MessagePage extends React.Component {
       resolve(true);
     });
     typingPromise.then(() => {
-      const { socket, message } = this.state;
+      const { socket, message, userId } = this.state;
       if (message !== '') {
-        socket.emit('typing', true);
+        socket.emit('typing', { userId, typing: true });
       } else {
-        socket.emit('typing', false);
+        socket.emit('typing', { userId, typing: false });
       }
     });
   }
 
   onSubmitHandler(event) {
-    const { message, socket } = this.state;
+    const { message, socket, userId } = this.state;
     event.preventDefault();
 
     const formInput = event.target[0];
@@ -184,13 +186,13 @@ class MessagePage extends React.Component {
 
     submitButton.setAttribute('disabled', 'disabled');
 
-    socket.emit('sendMessage', message, (msg) => {
+    socket.emit('sendMessage', { userId, message }, (msg) => {
       submitButton.removeAttribute('disabled');
       formInput.focus();
       return msg ? console.log(msg) : console.log('The message was delivered successfully!');
     });
 
-    socket.emit('typing', false);
+    socket.emit('typing', { userId, typing: false });
 
     this.setState({ message: '' });
   }

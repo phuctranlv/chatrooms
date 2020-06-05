@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { generateMessage, getMessages } = require('./utilities/messages');
 const {
-  addUser, getUser, getUsersInRoom, updateUser
+  addUser, getUser, getUserBySocketId, getUsersInRoom, updateUser
 } = require('./utilities/users');
 const router = require('./router');
 
@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
   console.log('New WebSocket connection');
 
   socket.on('join', ({ username, room }, cb) => {
-    const { error, user } = addUser({ id: socket.id, username, room });
+    const { error, user } = addUser({ socketId: socket.id, userId: username + room, username, room });
 
     if (error) return cb(error);
 
@@ -47,18 +47,18 @@ io.on('connection', (socket) => {
     cb();
   });
 
-  socket.on('sendMessage', (message, cb) => {
-    const user = getUser(socket.id);
+  socket.on('sendMessage', ({ userId, message }, cb) => {
+    const user = getUser(userId);
 
     io.to(user.room).emit('message', generateMessage(user.username, user, message));
 
     cb();
   });
 
-  socket.on('recording', (recording) => {
-    const user = getUser(socket.id);
+  socket.on('recording', ({ userId, recording }) => {
+    const user = getUser(userId);
 
-    updateUser(user.id, 'recording', recording);
+    updateUser(userId, 'recording', recording);
 
     io.to(user.room).emit('roomData', {
       room: user.room,
@@ -66,10 +66,10 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('typing', (typing) => {
-    const user = getUser(socket.id);
+  socket.on('typing', ({ userId, typing }) => {
+    const user = getUser(userId);
 
-    updateUser(user.id, 'typing', typing);
+    updateUser(userId, 'typing', typing);
 
     io.to(user.room).emit('roomData', {
       room: user.room,
@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    const user = getUser(socket.id);
+    const user = getUserBySocketId(socket.id);
 
     if (user) {
       io.to(user.room).emit('message', generateMessage('Admin', user, `${user.username} has left!`));
