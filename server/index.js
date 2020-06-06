@@ -4,9 +4,9 @@ const socketio = require('socket.io');
 const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const { generateMessage, getMessages } = require('./utilities/messages');
+const { generateConversation, getConversations } = require('./utilities/conversations');
 const {
-  addUser, getUser, getUserBySocketId, getUsersInRoom, updateUser
+  addUser, getUser, getUsersInRoom, updateUser, removeUser
 } = require('./utilities/users');
 const router = require('./router');
 
@@ -27,17 +27,17 @@ io.on('connection', (socket) => {
   console.log('New WebSocket connection');
 
   socket.on('join', ({ username, room }, cb) => {
-    const { error, user } = addUser({ socketId: socket.id, userId: `${username}${room}`, username, room });
+    const { error, user } = addUser({ socketId: socket.id, username, room });
 
     if (error) return cb(error);
 
     socket.join(user.room);
 
-    const chatsInRoom = getMessages(user.room);
+    const chatsInRoom = getConversations(user.room);
 
-    socket.emit('welcomeMessage', generateMessage('Admin', 1, user, `Welcome ${user.username}!`), chatsInRoom);
+    socket.emit('welcomeMessage', generateConversation('Admin', user, `Welcome ${user.username}!`), chatsInRoom);
 
-    socket.broadcast.to(user.room).emit('message', generateMessage('Admin', 1, user, `${user.username} has joined!`));
+    socket.broadcast.to(user.room).emit('conversation', generateConversation('Admin', user, `${user.username} has joined!`));
 
     io.to(user.room).emit('roomData', {
       room: user.room,
@@ -47,20 +47,20 @@ io.on('connection', (socket) => {
     cb();
   });
 
-  socket.on('sendMessage', ({ userId, text }, cb) => {
-    const user = getUser(userId);
+  socket.on('sendConversation', ({ username, text }, cb) => {
+    const user = getUser(username);
     if (!user) return;
 
-    io.to(user.room).emit('message', generateMessage(user.username, userId, user, text));
+    io.to(user.room).emit('conversation', generateConversation(username, user, text));
 
     cb();
   });
 
-  socket.on('recording', ({ userId, recording }) => {
-    const user = getUser(userId);
+  socket.on('recording', ({ username, recording }) => {
+    const user = getUser(username);
     if (!user) return;
 
-    updateUser(userId, 'recording', recording);
+    updateUser(username, 'recording', recording);
 
     io.to(user.room).emit('roomData', {
       room: user.room,
@@ -68,11 +68,11 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('typing', ({ userId, typing }) => {
-    const user = getUser(userId);
+  socket.on('typing', ({ username, typing }) => {
+    const user = getUser(username);
     if (!user) return;
 
-    updateUser(userId, 'typing', typing);
+    updateUser(username, 'typing', typing);
 
     io.to(user.room).emit('roomData', {
       room: user.room,
@@ -81,10 +81,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    const user = getUserBySocketId(socket.id);
+    const user = removeUser(socket.id);
 
     if (user) {
-      io.to(user.room).emit('message', generateMessage('Admin', 1, user, `${user.username} has left!`));
+      io.to(user.room).emit('conversation', generateConversation('Admin', user, `${user.username} has left!`));
       io.to(user.room).emit('roomData', {
         room: user.room,
         users: getUsersInRoom(user.room)

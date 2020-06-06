@@ -1,6 +1,6 @@
 const users = {};
 
-const addUser = ({ socketId, userId, username, room }) => {
+const addUser = ({ socketId, username, room }) => {
   username = username.trim().toLowerCase();
   room = room.trim().toLowerCase();
 
@@ -10,11 +10,12 @@ const addUser = ({ socketId, userId, username, room }) => {
     };
   }
 
-  const existingUsers = users[userId];
+  const existingUsers = users[username];
 
-  if (existingUsers !== undefined) {
-    existingUsers.socketId = socketId;
-    return { user: existingUsers };
+  if (existingUsers) {
+    return ({
+      error: 'Username for this room is already in used!'
+    });
   }
 
   const color = {
@@ -32,29 +33,38 @@ const addUser = ({ socketId, userId, username, room }) => {
     color: `rgb(${color.r},${color.g},${color.b})`
   };
 
-  users[userId] = (user);
+  users[username] = (user);
   return { user };
 };
 
-const getUser = (userId) => users[userId];
-
-const getUserBySocketId = (socketId) => (
-  Object.values(users).find((user) => user.socketId === socketId)
-);
+const getUser = (username) => users[username];
 
 const getUsersInRoom = (room) => (
   Object.values(users).filter((user) => user.room === room)
 );
 
-const updateUser = (userId, activity, status) => {
-  const user = getUser(userId);
+const updateUser = (username, activity, status) => {
+  const user = getUser(username);
   user[activity] = status;
 };
 
+const removeUser = (socketId) => {
+  let username;
+  const user = Object.values(users).find((userInRoom) => {
+    if (userInRoom.socketId === socketId) {
+      username = userInRoom.username;
+      return true;
+    }
+    return false;
+  });
+  if (username) delete users[username];
+  return user;
+};
+
 module.exports = {
-  getUserBySocketId,
   addUser,
   getUser,
   getUsersInRoom,
-  updateUser
+  updateUser,
+  removeUser
 };

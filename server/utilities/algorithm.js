@@ -24,13 +24,10 @@ const operationTransform = (b, a) => {
 };
 
 // O(1) time
-
 // // test:
 // const a = { author: 'alice', data: { index: 3, text: ' big', type: 'insert' }, origin: { alice: 2, bob: 6 } };
 // const b = { author: 'bob', data: { index: 13, text: ' and yellow', type: 'insert' }, origin: { alice: 2, bob: 6 } };
-
 // const { bPrime } = operationTransform(b, a);
-
 // console.log('bPrime:', bPrime);
 
 
@@ -47,7 +44,7 @@ const fullOperationTransform = (bee, mutationArray) => {
 };
 
 // O(n) time
-
+// // test:
 // const b00 = { author: 'bob', data: { index: 0, text: 'The', type: 'insert' }, origin: { alice: 0, bob: 0 } };
 // const b10 = { author: 'bob', data: { index: 3, text: ' house', type: 'insert' }, origin: { alice: 0, bob: 1 } };
 // const b20 = { author: 'bob', data: { index: 9, text: ' is', type: 'insert' }, origin: { alice: 0, bob: 2 } };
@@ -58,10 +55,7 @@ const fullOperationTransform = (bee, mutationArray) => {
 // const a61 = { author: 'alice', data: { index: 13, text: ' green', type: 'insert' }, origin: { alice: 1, bob: 6 } };
 // const a62 = { author: 'alice', data: { index: 3, text: ' big', type: 'insert' }, origin: { alice: 2, bob: 6 } };
 // const b62 = { author: 'bob', data: { index: 13, text: ' and yellow', type: 'insert' }, origin: { alice: 2, bob: 6 } };
-
-
 // const mutationArray = [b00, b10, b20, b30, b40, b50, a60, a61, a62];
-
 // console.log(fullOperationTransform(b62, mutationArray));
 
 module.exports = fullOperationTransform;
