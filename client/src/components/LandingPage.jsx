@@ -13,20 +13,8 @@ class LandingPage extends React.Component {
       room: '',
       showModal: true
     };
-    this.onSubmitHandler = this.onSubmitHandler.bind(this);
-    this.onChangeHandler = this.onChangeHandler.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  }
-
-
-  componentDidMount() {
-  }
-
-  onChangeHandler(event) {
-  }
-
-  onSubmitHandler(event) {
   }
 
   handleOpenModal() {
