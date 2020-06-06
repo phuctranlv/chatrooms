@@ -124,7 +124,7 @@ button:disabled {
 
 /* Message Styles */
 
-.message {
+.conversation {
     font-size: 24px;
     margin-bottom: 16px;   
 }
@@ -140,7 +140,7 @@ button:disabled {
     font-size: 14px;
 }
 
-.message a {
+.conversation a {
     color: #0070CC;
 }
 

@@ -4,17 +4,17 @@
 /* eslint-disable class-methods-use-this */
 import React from 'react';
 
-class MessagesPage extends React.Component {
+class ConversationsPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       socket: io(),
       socketInfo: Qs.parse(window.location.search, { ignoreQueryPrefix: true }),
       currentPhrase: 0,
-      message: '',
-      messages: [],
+      conversation: '',
+      conversations: [],
       room: '',
-      userId: '',
+      username: '',
       users: [],
       recording: false,
       typing: false,
@@ -32,42 +32,45 @@ class MessagesPage extends React.Component {
     const { socket, socketInfo } = this.state;
 
     socket.emit('join', socketInfo, (error) => {
-      this.setState({ userId: socketInfo.username + socketInfo.room });
+      this.setState({ username: socketInfo.username });
       if (error) {
         window.alert(error);
         window.location.href = '/';
       }
     });
 
-    socket.on('welcomeMessage', (message, chats) => {
+    socket.on('welcomeMessage', (conversation, chats) => {
       const promise = new Promise((resolve) => {
         this.setState({
-          messages: [
+          conversations: [
             ...chats,
             {
-              username: message.username,
-              createdAt: message.createdAt,
-              text: message.text,
-              color: message.color
+              username: conversation.username,
+              createdAt: conversation.createdAt,
+              text: conversation.text,
+              color: conversation.color,
+              id: conversation.id
             }
           ]
         });
         resolve(true);
       });
       promise.then(() => {
-        const $messages = document.getElementsByClassName('chat__messages');
-        $messages[0].scrollTop = $messages[0].scrollHeight;
+        const $conversations = document.getElementsByClassName('chat__messages');
+        $conversations[0].scrollTop = $conversations[0].scrollHeight;
       });
     });
 
-    socket.on('message', (message) => {
-      const { messages } = this.state;
+    socket.on('conversation', (conversation) => {
+      const { conversations } = this.state;
       this.setState({
-        messages: [...messages, {
-          username: message.username,
-          createdAt: message.createdAt,
-          text: message.text,
-          color: message.color
+        conversations: [...conversations, {
+          username: conversation.username,
+          createdAt: conversation.createdAt,
+          text: conversation.text,
+          color: conversation.color,
+          id: conversation.id,
+          lastMutation: conversation.lastMutation
         }]
       });
       this.autoScroll();
@@ -90,8 +93,8 @@ class MessagesPage extends React.Component {
         speakButton.textContent = '🎙';
         speakButton.classList.remove('speaking');
         this.setState(() => {
-          const { socket, userId } = this.state;
-          socket.emit('recording', { userId, recording: false });
+          const { socket, username } = this.state;
+          socket.emit('recording', { username, recording: false });
           return { recording: false, currentPhrase: 0 };
         });
       };
@@ -101,8 +104,8 @@ class MessagesPage extends React.Component {
         speakButton.textContent = 'Stop speech';
         speakButton.classList.add('speaking');
         this.setState(() => {
-          const { socket, userId } = this.state;
-          socket.emit('recording', { userId, recording: true });
+          const { socket, username } = this.state;
+          socket.emit('recording', { username, recording: true });
           return { recording: true, currentPhrase: 0 };
         });
       };
@@ -126,11 +129,11 @@ class MessagesPage extends React.Component {
         });
 
         speechUpdatePromise.then(() => {
-          const { socket, userId } = this.state;
-          socket.emit('sendMessage', { userId, text: speechToText }, (message) => (
-            message
-              ? console.log(message)
-              : console.log('The message was delivered successfully!')));
+          const { socket, username } = this.state;
+          socket.emit('sendConversation', { username, text: speechToText }, (conversation) => (
+            conversation
+              ? console.log(conversation)
+              : console.log('The conversation was delivered successfully!')));
           speechToText = '';
         });
       };
@@ -147,21 +150,21 @@ class MessagesPage extends React.Component {
 
   onChangeHandler(event) {
     const typingPromise = new Promise((resolve) => {
-      this.setState({ message: event.target.value });
+      this.setState({ conversation: event.target.value });
       resolve(true);
     });
     typingPromise.then(() => {
-      const { socket, message, userId } = this.state;
-      if (message !== '') {
-        socket.emit('typing', { userId, typing: true });
+      const { socket, conversation, username } = this.state;
+      if (conversation !== '') {
+        socket.emit('typing', { username, typing: true });
       } else {
-        socket.emit('typing', { userId, typing: false });
+        socket.emit('typing', { username, typing: false });
       }
     });
   }
 
   onSubmitHandler(event) {
-    const { message, socket, userId } = this.state;
+    const { conversation, socket, username } = this.state;
     event.preventDefault();
 
     const formInput = event.target[0];
@@ -169,15 +172,15 @@ class MessagesPage extends React.Component {
 
     submitButton.setAttribute('disabled', 'disabled');
 
-    socket.emit('sendMessage', { userId, text: message }, (msg) => {
+    socket.emit('sendConversation', { username, text: conversation }, (msg) => {
       submitButton.removeAttribute('disabled');
       formInput.focus();
-      return msg ? console.log(msg) : console.log('The message was delivered successfully!');
+      return msg ? console.log(msg) : console.log('The conversation was delivered successfully!');
     });
 
-    socket.emit('typing', { userId, typing: false });
+    socket.emit('typing', { username, typing: false });
 
-    this.setState({ message: '' });
+    this.setState({ conversation: '' });
   }
 
   onSpeakHandler(event) {
@@ -201,31 +204,31 @@ class MessagesPage extends React.Component {
   }
 
   autoScroll() {
-    const $messages = document.getElementsByClassName('chat__messages');
-    const $newMessage = $messages[0].lastElementChild;
-    // height of new message:
-    const newMessageStyle = getComputedStyle($newMessage);
+    const $conversations = document.getElementsByClassName('chat__messages');
+    const $newConversation = $conversations[0].lastElementChild;
+    // height of new conversation:
+    const newMessageStyle = getComputedStyle($newConversation);
     const newMessageMargin = parseInt(newMessageStyle.marginBottom, 10);
-    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
+    const newMessageHeight = $newConversation.offsetHeight + newMessageMargin;
     // visible height:
-    const visibleHeight = $messages[0].offsetHeight;
-    // height of messages container:
-    const containerHeight = $messages[0].scrollHeight;
+    const visibleHeight = $conversations[0].offsetHeight;
+    // height of conversations container:
+    const containerHeight = $conversations[0].scrollHeight;
     // how far have I scrolled:
-    const scrollOffset = $messages[0].scrollTop + visibleHeight;
+    const scrollOffset = $conversations[0].scrollTop + visibleHeight;
     if (containerHeight - newMessageHeight <= scrollOffset) {
-      $messages[0].scrollTop = $messages[0].scrollHeight;
+      $conversations[0].scrollTop = $conversations[0].scrollHeight;
     }
   }
 
   render() {
     const {
-      users, messages, message, room
+      users, conversations, conversation, room
     } = this.state;
 
     return (
       <div>
-        <div className="topbar">Demo for & ava</div>
+        <div className="topbar">Demo for &ava</div>
         <div className="chat">
           <div className="chat__sidebar">
             <h2 className="room-title">
@@ -258,50 +261,51 @@ class MessagesPage extends React.Component {
           <div className="chat__main">
             <div className="chat__messages">
               {
-                messages.map((msg, index) => {
-                  let messageText;
-                  const time = moment(msg.createdAt).format('h:mm a')
+                conversations.map((msg, index) => {
+                  let conversationText;
+                  const time = moment(msg.createdAt).format('h:mm a');
                   if (msg.username === '') return;
                   if (msg.username === 'Admin') {
-                    messageText = (
+                    conversationText = (
                       <div>
                         <p>
                           <span className="message__name">{msg.username}</span>
                           <span className="message__meta">{time}</span>
                         </p>
-                        <p className="message__text">
+                        <p>
                           {msg.text}
                         </p>
                       </div>
                     );
-                  } else if (index >= 1 && msg.username === messages[index - 1].username) {
-                    messageText = (
+                  } else if (index >= 1 && msg.username === conversations[index - 1].username) {
+                    conversationText = (
                       <div
                         style={{ display: 'flex' }}
                       >
-                        <textarea
-                          className="message__text"
-                          rows="5"
-                          cols="50"
-                          wrap="soft"
-                          style={{ 'font-size': '25px', color: `${msg.color}` }}
-                        >
-                          {msg.text}
-                        </textarea>
+                        <div>
+                          <textarea
+                            rows="5"
+                            cols="50"
+                            wrap="soft"
+                            style={{ 'font-size': '25px', color: `${msg.color}` }}
+                          >
+                            {msg.text}
+                          </textarea>
+                        </div>
+
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column'
                         }}
                         >
                           <input type="submit" value="⭐️" />
-                          <input type="submit" value="💾" />
                           <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
                           <input type="submit" value="❌" />
                         </div>
                       </div>
                     );
                   } else {
-                    messageText = (
+                    conversationText = (
                       <div>
                         <p>
                           <span className="message__name">{msg.username}</span>
@@ -310,22 +314,22 @@ class MessagesPage extends React.Component {
                         <div
                           style={{ display: 'flex' }}
                         >
-                          <textarea
-                            className="message__text"
-                            rows="5"
-                            cols="50"
-                            wrap="soft"
-                            style={{ 'font-size': '25px', color: `${msg.color}` }}
-                          >
-                            {msg.text}
-                          </textarea>
+                          <div>
+                            <textarea
+                              rows="5"
+                              cols="50"
+                              wrap="soft"
+                              style={{ 'font-size': '25px', color: `${msg.color}` }}
+                            >
+                              {msg.text}
+                            </textarea>
+                          </div>
                           <div style={{
                             display: 'flex',
                             flexDirection: 'column'
                           }}
                           >
                             <input type="submit" value="⭐️" />
-                            <input type="submit" value="💾" />
                             <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
                             <input type="submit" value="❌" />
                           </div>
@@ -335,10 +339,10 @@ class MessagesPage extends React.Component {
                   }
                   return (
                     <div
-                      className="message"
+                      className="conversation"
                       style={{ color: `${msg.color}` }}
                     >
-                      {messageText}
+                      {conversationText}
                     </div>
                   );
                 })
@@ -349,7 +353,7 @@ class MessagesPage extends React.Component {
                 <input
                   type="text"
                   placeholder="Type new conversation here"
-                  value={message}
+                  value={conversation}
                   onChange={this.onChangeHandler}
                   required
                   autoComplete="off"
@@ -367,4 +371,4 @@ class MessagesPage extends React.Component {
   }
 }
 
-export default MessagesPage;
+export default ConversationsPage;

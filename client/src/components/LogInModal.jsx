@@ -13,7 +13,7 @@ const SignInModal = (props) => {
           <div className="centered-form">
             <div className="centered-form__box">
               <h1>Join</h1>
-              <form action="/chat.html">
+              <form action="/conversations.html">
                 <label>Display name</label>
                 <input type="text" name="username" placeholder="Display name" required />
                 <label style={{ display: 'none' }}>Room</label>
