@@ -1,9 +1,12 @@
 const cassandra = require('cassandra-driver');
 const { contactPoints, localDataCenter } = require ('../setupFile');
 
+const dbURL = process.env.DATABASE_URL || contactPoints;
+const dataCenter = process.env.LOCAL_DATA_CENTER || localDataCenter;
+
 const client = new cassandra.Client({
-  contactPoints: [contactPoints],
-  localDataCenter: localDataCenter,
+  contactPoints: [dbURL],
+  localDataCenter: dataCenter,
   keyspace: 'collaborativediting'
 });
 
