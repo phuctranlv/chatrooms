@@ -58,4 +58,4 @@ const fullOperationTransform = (bee, mutationArray) => {
 // const mutationArray = [b00, b10, b20, b30, b40, b50, a60, a61, a62];
 // console.log(fullOperationTransform(b62, mutationArray));
 
-module.exports = fullOperationTransform;
+module.exports = { operationTransform, fullOperationTransform };
