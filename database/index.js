@@ -1,8 +1,10 @@
 const cassandra = require('cassandra-driver');
-const { contactPoints, localDataCenter } = require ('../setupFile');
 
-const dbURL = process.env.DATABASE_URL || contactPoints;
-const dataCenter = process.env.LOCAL_DATA_CENTER || localDataCenter;
+let dbURL;
+process.env.DATABASE_URL ? dbURL = process.env.DATABASE_URL : dbURL = require('../setupFile').contactPoints;
+let dataCenter;
+process.env.LOCAL_DATA_CENTER ? dataCenter = process.env.LOCAL_DATA_CENTER : dataCenter = require('../setupFile').localDataCenter;
+
 
 const client = new cassandra.Client({
   contactPoints: [dbURL],
