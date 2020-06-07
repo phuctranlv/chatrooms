@@ -4,6 +4,7 @@ const socketio = require('socket.io');
 const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const { insertConversation, getAllConversations } = require('./utilities/conversationModel');
 const {
@@ -17,6 +18,9 @@ const io = socketio(server);
 
 const port = process.env.USER === 'phuctran' ? 3000 : process.env.PORT || '0.0.0.0';
 
+app.use(cors({
+  origin: 'https://app.ava.me'
+}));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,39 +32,40 @@ io.on('connection', (socket) => {
   console.log('New WebSocket connection');
 
   socket.on('join', ({ username, room }, cb) => {
-    const { error, user } = addUser({ socketId: socket.id, username, room });
+    addUser(socket.id, username, room, (error, user) => {
+      if (error) return cb(error);
+      if (user) {
+        cb();
+        socket.join(user.room);
 
-    if (error) return cb(error);
-    cb();
+        getAllConversations((getAllConversationsError, getAllConversationsResult) => {
+          if (getAllConversationsResult) {
+            const conversation = {
+              username: 'Admin',
+              text: `Welcome ${user.username}!`,
+              createdat: new Date().getTime(),
+              color: user.color,
+              id: `${username}${this.createdat}`
+            };
+            socket.emit('welcomeMessage', conversation, getAllConversationsResult.rows);
+          }
+        });
 
-    socket.join(user.room);
-
-    getAllConversations((getAllConversationsError, getAllConversationsResult) => {
-      if (getAllConversationsResult) {
         const conversation = {
           username: 'Admin',
-          text: `Welcome ${user.username}!`,
+          text: `${user.username} has joined!`,
           createdat: new Date().getTime(),
           color: user.color,
           id: `${username}${this.createdat}`
         };
-        socket.emit('welcomeMessage', conversation, getAllConversationsResult.rows);
+
+        socket.broadcast.to(user.room).emit('conversation', conversation);
+
+        io.to(user.room).emit('roomData', {
+          room: user.room,
+          users: getUsersInRoom(user.room)
+        });
       }
-    });
-
-    const conversation = {
-      username: 'Admin',
-      text: `${user.username} has joined!`,
-      createdat: new Date().getTime(),
-      color: user.color,
-      id: `${username}${this.createdat}`
-    };
-
-    socket.broadcast.to(user.room).emit('conversation', conversation);
-
-    io.to(user.room).emit('roomData', {
-      room: user.room,
-      users: getUsersInRoom(user.room)
     });
   });
 
