@@ -9,16 +9,17 @@ CREATE TABLE conversations (
   id varchar,
   username varchar,
   text varchar,
-  createdat int,
+  createdat varchar,
   color varchar,
   lastmutationid int,
+  lastmutationobject VARCHAR,
   PRIMARY KEY (id, createdat)
 );
 
 CREATE TABLE mutations (
   id varchar,
   username varchar,
-  createdat int,
+  createdat varchar,
   color varchar,
   mutationid int,
   mutationindex int,

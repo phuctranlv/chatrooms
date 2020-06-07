@@ -263,7 +263,7 @@ class ConversationsPage extends React.Component {
               {
                 conversations.map((msg, index) => {
                   let conversationText;
-                  const time = moment(msg.createdAt).format('h:mm a');
+                  const time = moment(parseInt(msg.createdAt)).format('h:mm a');
                   if (msg.username === '') return;
                   if (msg.username === 'Admin') {
                     conversationText = (
