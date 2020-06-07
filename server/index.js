@@ -40,9 +40,9 @@ io.on('connection', (socket) => {
         const conversation = {
           username: 'Admin',
           text: `Welcome ${user.username}!`,
-          createdAt: new Date().getTime(),
+          createdat: new Date().getTime(),
           color: user.color,
-          id: `${username}${this.createdAt}`
+          id: `${username}${this.createdat}`
         };
         socket.emit('welcomeMessage', conversation, getAllConversationsResult.rows);
       }
@@ -51,9 +51,9 @@ io.on('connection', (socket) => {
     const conversation = {
       username: 'Admin',
       text: `${user.username} has joined!`,
-      createdAt: new Date().getTime(),
+      createdat: new Date().getTime(),
       color: user.color,
-      id: `${username}${this.createdAt}`
+      id: `${username}${this.createdat}`
     };
 
     socket.broadcast.to(user.room).emit('conversation', conversation);
@@ -107,9 +107,9 @@ io.on('connection', (socket) => {
       const conversation = {
         username: 'Admin',
         text: `${user.username} has joined!`,
-        createdAt: new Date().getTime(),
+        createdat: new Date().getTime(),
         color: user.color,
-        id: `${user.username}${this.createdAt}`,
+        id: `${user.username}${this.createdat}`,
         mutations: [],
         lastMutation: {}
       };

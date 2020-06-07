@@ -43,9 +43,9 @@ cassandraDb.checkConversationExistence = (id, cb) => {
   });
 };
 
-cassandraDb.insertConversationMutation = (id, username, createdat, color, mutationid, mutationindex, length, text, type, originalice, originbob, cb) => {
-  const queryParam = [id, username, createdat, color, mutationid, mutationindex, length, text, type, originalice, originbob];
-  const query = 'insert into mutations (id, username, createdat, color, mutationid, mutationindex, length, text, type, originalice, originbob) values (?, ?, ? ,?, ?, ?, ?, ?, ? ,?, ?)';
+cassandraDb.insertConversationMutation = (id, username, createdat, color, mutationId, mutationindex, length, text, type, originalice, originbob, cb) => {
+  const queryParam = [id, username, createdat, color, mutationId, mutationindex, length, text, type, originalice, originbob];
+  const query = 'insert into mutations (id, username, createdat, color, mutationId, mutationindex, length, text, type, originalice, originbob) values (?, ?, ? ,?, ?, ?, ?, ?, ? ,?, ?)';
 
   client.execute(query, queryParam, { prepare: true }, (err, result) => {
     if (err) {
@@ -122,7 +122,7 @@ cassandraDb.getAllConversations = (cb) => {
 //     bob: 'integer'
 //   }
 // });
-// const mutationid = 4;
+// const mutationId = 4;
 // const mutationindex = 5;
 // const length = '4';
 // const type = 'delete';
@@ -139,7 +139,7 @@ cassandraDb.getAllConversations = (cb) => {
 
 // // cassandraDb.deleteConversation(id);
 // cassandraDb.checkConversationExistence(id, callback);
-// cassandraDb.insertConversationMutation(id, username, createdat, color, mutationid, mutationindex, length, text, type, originalice, originbob, callback);
+// cassandraDb.insertConversationMutation(id, username, createdat, color, mutationId, mutationindex, length, text, type, originalice, originbob, callback);
 // cassandraDb.getAllMutationsOfAConversation(id, callback);
 
 module.exports = cassandraDb;

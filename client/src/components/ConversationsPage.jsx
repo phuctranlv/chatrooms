@@ -46,7 +46,7 @@ class ConversationsPage extends React.Component {
             ...chats,
             {
               username: conversation.username,
-              createdAt: conversation.createdAt,
+              createdat: conversation.createdat,
               text: conversation.text,
               color: conversation.color,
               id: conversation.id
@@ -66,11 +66,11 @@ class ConversationsPage extends React.Component {
       this.setState({
         conversations: [...conversations, {
           username: conversation.username,
-          createdAt: conversation.createdAt,
+          createdat: conversation.createdat,
           text: conversation.text,
           color: conversation.color,
           id: conversation.id,
-          lastMutation: conversation.lastMutation
+          lastmutation: conversation.lastmutation
         }]
       });
       this.autoScroll();
@@ -263,7 +263,10 @@ class ConversationsPage extends React.Component {
               {
                 conversations.map((msg, index) => {
                   let conversationText;
-                  const time = moment(parseInt(msg.createdAt)).format('h:mm a');
+                  console.log(msg.createdat)
+                  const parsedTime = parseInt(msg.createdat, 10);
+                  console.log(parsedTime);
+                  const time = moment(parsedTime).format('h:mm a');
                   if (msg.username === '') return;
                   if (msg.username === 'Admin') {
                     conversationText = (
