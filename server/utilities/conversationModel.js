@@ -5,19 +5,19 @@ const { addUser } = require('./users');
 const cassandraDb = require('../../database/index');
 
 const insertConversation = (username, user, text, cb) => {
-  let createdAt = new Date().getTime();
-  createdAt = JSON.stringify(createdAt);
-  const id = `${username}${createdAt}`;
+  let createdat = new Date().getTime();
+  createdat = JSON.stringify(createdat);
+  const id = `${username}${createdat}`;
   const { color } = user;
   const lastmutationid = 0;
   const lastmutationobject = JSON.stringify({
     author: username,
-    conversationId: id,
+    id,
     data: {
       index: 0,
       length: 0,
       text,
-      type: "insert"
+      type: 'insert'
     },
     origin: {
       alice: 0,
@@ -28,98 +28,84 @@ const insertConversation = (username, user, text, cb) => {
   const conversation = {
     username,
     text,
-    createdAt,
+    createdat,
     color,
     id,
     lastmutationid,
     lastmutationobject
   };
 
-  cassandraDb.insertConversation(id, username, text, createdAt, color, lastmutationid, lastmutationobject, (error, result) => {
+  cassandraDb.insertConversation(id, username, text, createdat, color, lastmutationid, lastmutationobject, (error, result) => {
+    if (error) cb(error, null);
     if (result) cb(null, conversation);
   });
 };
 
 const getAllConversations = (cb) => {
   cassandraDb.getAllConversations((error, result) => {
+    if (error) cb(error, result);
     if (result) cb(null, result);
   });
 };
 
-// const deleteConversation = (id, cb) => {
-//   cassandraDb.deleteConversation(id, (error, result) => {
-//     if (error) cb(error, null);
-//     if (result) cb(null, result);
-//   });
-// };
+const deleteConversation = (id, cb) => {
+  cassandraDb.deleteConversation(id, (error, result) => {
+    if (error) cb(error, null);
+    if (result) cb(null, result);
+  });
+};
 
-// const getAllMutationsOfAConversation = (id, cb) => {
-//   cassandraDb.getAllMutationsOfAConversation(id, (error, result) => {
-//     if (error) cb(error, null);
-//     if (result) cb(null, result);
-//   });
-// };
+const mutateConversation = (mutateObject, user, cb) => {
+  user = user || addUser({ socketId: 'defaultSocketId', username: mutateObject.author, room: 'lobby' });
 
-// const mutateConversation = (mutateObject, user, cb) => {
-//   user = user || addUser({ socketId: 'defaultSocketId', username: mutateObject.author, room: 'lobby' });
+  cassandraDb.checkConversationExistence(mutateObject.id, (error, result) => {
 
-//   cassandraDb.checkConversationExistence(mutateObject.conversationId, (error, result) => {
+    if (error) return cb(error, null);
 
-//     if (error) return cb(error, null);
+    if (!result) {
+      if (mutateObject.data.type === 'insert') {
+        insertConversation(user.username, user, mutateObject.data.text)
+          .then((conversation) => conversation.text)
+          .catch((error) => error);
+      }
+    } else {
+      const currentText = result[0].text;
+      const mutateObjectMutationId = mutateObject.origin.alice + mutateObject.origin.bob;
 
-//     if (!result) {
-//       if (mutateObject.data.type === 'insert') {
-//         insertConversation(user.username, user, mutateObject.data.text)
-//           .then((conversation) => conversation.text)
-//           .catch((error) => error);
-//       }
-//     } else {
-//       const currentText = result[0].text;
-//       const mutateObjectMutationId = mutateObject.origin.alice + mutateObject.origin.bob;
+      let transformedMutationObject;
+      let insertQueryArguments;
 
-//       let transformedMutationObject;
-//       let insertQueryArguments;
+      if (mutateObjectMutationId === result[0].lastmutationid) {
+        transformedMutationObject = operationTransform(mutateObject, JSON.parse(result[0].lastmutationobject));
 
-//       if (mutateObjectMutationId === result[0].lastmutationid) {
-//         transformedMutationObject = operationTransform(mutateObject, JSON.parse(result[0].lastmutationobject));
+        insertQueryArguments = {
+          id: transformedMutationObject.id,
+          username: user.username,
+          createdat: new Date().getTime(),
+          color: user.color,
+          mutationid: result[0].lastmutationid + 1,
+          mutationindex: transformedMutationObject.data.index,
+          length: transformedMutationObject.data.length,
+          text: transformedMutationObject.data.text,
+          type: transformedMutationObject.data.type,
+          originalice: transformedMutationObject.origin.alice,
+          originbob: transformedMutationObject.origin.bob
+        };
 
-//         insertQueryArguments = {
-//           id: transformedMutationObject.conversationId,
-//           username: user.username,
-//           createdat: new Date().getTime(),
-//           color: user.color,
-//           mutationid: result[0].lastmutationid + 1,
-//           mutationindex: transformedMutationObject.data.index,
-//           length: transformedMutationObject.data.length,
-//           text: transformedMutationObject.data.text,
-//           type: transformedMutationObject.data.type,
-//           originalice: transformedMutationObject.origin.alice,
-//           originbob: transformedMutationObject.origin.bob
-//         };
+      } else if (mutateObjectMutationId < result[0].lastmutationid) {
 
 
-//       } else if (mutateObjectMutationId < result[0].lastmutationid) {
+      }
 
+      cassandraDb.insertConversationMutation({ insertQueryArguments })
+        .then(() => {
 
-//       }
+        })
+        .catch((error) => error);
 
-
-
-
-
-//       cassandraDb.insertConversationMutation({ insertQueryArguments })
-//         .then(() => {
-
-//         })
-//         .catch((error) => error);
-
-
-//     }
-//   })
-// };
-
-
-
+    }
+  })
+};
 
 
 // // test:
@@ -136,5 +122,7 @@ const getAllConversations = (cb) => {
 
 module.exports = {
   insertConversation,
-  getAllConversations
+  getAllConversations,
+  deleteConversation,
+  mutateConversation
 };
