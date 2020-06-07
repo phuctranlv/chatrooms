@@ -33,7 +33,28 @@ router.get('/info', (req, res) => {
   });
 });
 
-router.post('/mutations', mutateConversation);
+router.post('/mutations', (req, res) => {
+  if (!req.is('application/json') || !req.body.conversationId) {
+    res.sendStatus(400);
+    return;
+  }
+
+  mutateConversation(req.body, undefined, (error, result) => {
+    if (error) {
+      res.send({
+        msg: `There was an error trying to mutate the conversation. The error is: ${error}`,
+        ok: false,
+        text: 'no updated text due to error trying to mutate the conversation'
+      });
+    } else {
+      res.status(201).send({
+        msg: 'Successfully mutated the conversation',
+        ok: true,
+        text: result
+      });
+    }
+  });
+});
 
 router.get('/conversations', (req, res) => {
   getAllConversations((error, result) => {
@@ -62,7 +83,7 @@ router.delete('/conversations', (req, res) => {
         ok: false
       });
     } else {
-      res.send({
+      res.status(204).send({
         msg: 'Successfully deleted the conversation.',
         ok: true
       });
