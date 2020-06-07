@@ -1,21 +1,17 @@
 const users = {};
 
-const addUser = ({ socketId, username, room }) => {
+const addUser = (socketId, username, room, cb) => {
   username = username.trim().toLowerCase();
   room = room.trim().toLowerCase();
 
   if (!username || !room) {
-    return {
-      error: 'Username and room are required'
-    };
+    return cb('Username and room are required', null);
   }
 
   const existingUsers = users[username];
 
-  if (existingUsers) {
-    return ({
-      error: 'Username for this room is already in used!'
-    });
+  if (socketId !== 'defaultSocketId' && existingUsers) {
+    return cb('Username for this room is already in used!');
   }
 
   const color = {
@@ -34,7 +30,7 @@ const addUser = ({ socketId, username, room }) => {
   };
 
   users[username] = (user);
-  return { user };
+  cb(null, user);
 };
 
 const getUser = (username) => users[username];
