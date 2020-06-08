@@ -40,10 +40,10 @@ cassandraDb.checkConversationExistence = (id, cb) => {
 
   client.execute(query, queryParam, { prepare: true }, (err, result) => {
     if (err) {
-      console.log('error from checking conversation existence:', err);
+      // console.log('error from checking conversation existence:', err);
       cb(err, null);
     } else {
-      console.log('result from checking conversation existence:', result);
+      // console.log('result from checking conversation existence:', result);
       cb(null, result);
     }
   });
@@ -55,10 +55,10 @@ cassandraDb.insertConversationMutation = (id, username, createdat, color, mutati
 
   client.execute(query, queryParam, { prepare: true }, (err, result) => {
     if (err) {
-      console.log('error from mutating conversation:', err);
+      // console.log('error from mutating conversation:', err);
       cb(err, null);
     } else {
-      console.log('result from mutating conversation:', result);
+      // console.log('result from mutating conversation:', result);
       cb(null, result);
     }
   });
@@ -70,10 +70,10 @@ cassandraDb.getAllMutationsOfAConversation = (id, cb) => {
   
   client.execute(query, queryParam, { prepare: true }, (err, result) => {
     if (err) {
-      console.log('error from getting all mutations of a conversation:', err);
+      // console.log('error from getting all mutations of a conversation:', err);
       cb(err, null);
     } else {
-      console.log('result from getting all mutations of a conversation:', result);
+      // console.log('result from getting all mutations of a conversation:', result);
       cb(null, result);
     }
   });
@@ -85,11 +85,11 @@ cassandraDb.deleteConversation = (id, cb) => {
 
   client.execute(query, queryParam, { prepare: true }, (err, result) => {
     if (err) {
-      console.log('error from deleting conversation:', err);
+      // console.log('error from deleting conversation:', err);
       cb(err, null);
     } else {
       cb(null, result);
-      console.log('result from deleting conversation:', result);
+      // console.log('result from deleting conversation:', result);
     }
   });
 };
@@ -107,45 +107,5 @@ cassandraDb.getAllConversations = (cb) => {
     }
   });
 };
-
-// const id = 'phuctranlv1234';
-// const username = 'phuctranlv';
-// const text = 'test test test';
-// const createdat = '1234';
-// const color = 'rbg(somenumber,somenumber,somenumber)';
-// const lastmutationid = 3;
-// const lastmutationobject = JSON.stringify({
-//   author: 'alice | bob',
-//   conversationId: 'string',
-//   data: {
-//     index: 3,
-//     length: 'number | undefined',
-//     text: 'string | undefined',
-//     type: 'insert | delete'
-//   },
-//   origin: {
-//     alice: 'integer',
-//     bob: 'integer'
-//   }
-// });
-// const mutationId = 4;
-// const mutationindex = 5;
-// const length = '4';
-// const type = 'delete';
-// const originalice = 4;
-// const originbob = 3;
-
-// const callback = (error, result) => {
-//   if (error) console.log('Theres an error. the error is:', error);
-//   if (result) console.log('success! the result is:', result);
-// };
-
-// cassandraDb.insertConversation(id, username, text, createdat, color, lastmutationid, lastmutationobject, callback);
-// cassandraDb.getAllConversations(callback);
-
-// // cassandraDb.deleteConversation(id);
-// cassandraDb.checkConversationExistence(id, callback);
-// cassandraDb.insertConversationMutation(id, username, createdat, color, mutationId, mutationindex, length, text, type, originalice, originbob, callback);
-// cassandraDb.getAllMutationsOfAConversation(id, callback);
 
 module.exports = cassandraDb;
