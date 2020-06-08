@@ -41,7 +41,7 @@ router.post('/mutations', (req, res) => {
 
   mutateConversation(req.body, undefined, (error, result) => {
     if (error) {
-      res.send({
+      res.status(201).send({
         msg: `There was an error trying to mutate the conversation. The error is: ${error}`,
         ok: false,
         text: 'no updated text due to error trying to mutate the conversation'
@@ -66,7 +66,7 @@ router.get('/conversations', (req, res) => {
       });
     } else {
       res.send({
-        conversations: result.rows,
+        conversations: result,
         msg: 'Successfully retrieved all the conversations',
         ok: true
       });
@@ -75,7 +75,7 @@ router.get('/conversations', (req, res) => {
 });
 
 router.delete('/conversations', (req, res) => {
-  const parameter = req.body.id || req.query.id;
+  const parameter = req.body.conversationId || req.query.id;
   deleteConversation(parameter, (error, result) => {
     if (error) {
       res.send({
@@ -83,10 +83,7 @@ router.delete('/conversations', (req, res) => {
         ok: false
       });
     } else {
-      res.status(204).send({
-        msg: 'Successfully deleted the conversation.',
-        ok: true
-      });
+      res.status(204).send();
     }
   });
 });
