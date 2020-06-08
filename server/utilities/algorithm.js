@@ -1,61 +1,76 @@
 const operationTransform = (b, a) => {
+  console.log('inside operationTransform');
+  console.log('the untransformed object is:', b);
   const bPrime = JSON.parse(JSON.stringify(b));
-  if (b.data.type === 'insert' && a.data.type === 'insert') {
-    if (a.data.index < b.data.index) {
-      bPrime.data.index += a.data.text.length;
+  if (b.type === 'insert' && a.type === 'insert') {
+    if (a.mutationindex < b.mutationindex) {
+      bPrime.mutationindex += a.text.length;
     }
-  } else if (b.data.type === 'insert' && a.data.type === 'delete') {
-    if (a.data.index < b.data.index) {
-      bPrime.data.index -= a.data.text.length;
+  } else if (b.type === 'insert' && a.type === 'delete') {
+    if (a.mutationindex < b.mutationindex) {
+      bPrime.mutationindex -= a.text.length;
     }
-  } else if (b.data.type === 'delete' && a.data.type === 'insert') {
-    if (a.data.index < b.data.index) {
-      bPrime.data.index -= a.data.text.length;
+  } else if (b.type === 'delete' && a.type === 'insert') {
+    if (a.mutationindex < b.mutationindex) {
+      bPrime.mutationindex -= a.text.length;
     }
-  } else if (b.data.type === 'delete' && a.data.type === 'delete') {
-    if (a.data.index < b.data.index) {
-      bPrime.data.index -= a.data.text.length;
+  } else if (b.type === 'delete' && a.type === 'delete') {
+    if (a.mutationindex < b.mutationindex) {
+      bPrime.mutationindex -= a.text.length;
     }
   }
 
-  bPrime.origin[a.author] += 1;
-
-  return { bPrime };
+  bPrime[`origin${a.username}`] += 1;
+  console.log('the transformed object is:');
+  console.log(": -----------------------------------");
+  console.log("operationTransform -> bPrime", bPrime);
+  console.log(": -----------------------------------");
+  return bPrime;
 };
 
-// O(1) time
-// // test:
-// const a = { author: 'alice', data: { index: 3, text: ' big', type: 'insert' }, origin: { alice: 2, bob: 6 } };
-// const b = { author: 'bob', data: { index: 13, text: ' and yellow', type: 'insert' }, origin: { alice: 2, bob: 6 } };
-// const { bPrime } = operationTransform(b, a);
-// console.log('bPrime:', bPrime);
-
-
 const fullOperationTransform = (bee, mutationArray) => {
-  const lastPosition = Object.values(mutationArray[mutationArray.length - 1].origin).reduce((acc, cur) => acc + cur);
-  let position = Object.values(bee.origin).reduce((acc, cur) => acc + cur);
+  console.log('inside fulloperationTransform');
+  console.log(": ---------------------------------");
+  console.log("fullOperationTransform -> bee", bee)
+  console.log(": ---------------------------------");
+  console.log('mutationArray is:', mutationArray);
+  const lastPosition = mutationArray[mutationArray.length - 1].originalice + mutationArray[mutationArray.length - 1].originbob;
+  console.log('lastPosition:', lastPosition)
+  let position = bee.originalice + bee.originbob;
   let beePrime = JSON.parse(JSON.stringify(bee));
   while (position <= lastPosition) {
     beePrime = operationTransform(beePrime, mutationArray[position]);
     position += 1;
   }
-
+  console.log(": -------------------------------------------");
+  console.log("fullOperationTransform -> beePrime", beePrime)
+  console.log(": -------------------------------------------");
   return beePrime;
 };
 
-// O(n) time
-// // test:
-// const b00 = { author: 'bob', data: { index: 0, text: 'The', type: 'insert' }, origin: { alice: 0, bob: 0 } };
-// const b10 = { author: 'bob', data: { index: 3, text: ' house', type: 'insert' }, origin: { alice: 0, bob: 1 } };
-// const b20 = { author: 'bob', data: { index: 9, text: ' is', type: 'insert' }, origin: { alice: 0, bob: 2 } };
-// const b30 = { author: 'bob', data: { index: 12, text: ' red', type: 'insert' }, origin: { alice: 0, bob: 3 } };
-// const b40 = { author: 'bob', data: { index: 13, length: 4, type: 'delete' }, origin: { alice: 0, bob: 4 } };
-// const b50 = { author: 'bob', data: { index: 13, text: ' blue', type: 'insert' }, origin: { alice: 0, bob: 5 } };
-// const a60 = { author: 'alice', data: { index: 13, length: 4, type: 'delete' }, origin: { alice: 0, bob: 6 } };
-// const a61 = { author: 'alice', data: { index: 13, text: ' green', type: 'insert' }, origin: { alice: 1, bob: 6 } };
-// const a62 = { author: 'alice', data: { index: 3, text: ' big', type: 'insert' }, origin: { alice: 2, bob: 6 } };
-// const b62 = { author: 'bob', data: { index: 13, text: ' and yellow', type: 'insert' }, origin: { alice: 2, bob: 6 } };
-// const mutationArray = [b00, b10, b20, b30, b40, b50, a60, a61, a62];
-// console.log(fullOperationTransform(b62, mutationArray));
+const textTransform = (transformedObject, currentText) => {
+  console.log('inside texttransform');
+  console.log(": ----------------------------------------");
+  console.log("textTransform -> currentText", currentText)
+  console.log(": ----------------------------------------");
+  let transformedText;
 
-module.exports = { operationTransform, fullOperationTransform };
+  if (transformedObject.type === 'delete' && transformedObject.length > currentText.length) {
+    transformedObject.length = 0;
+    transformedText = '';
+  } else if (transformedObject.type === 'insert') {
+    const frontText = currentText.slice(0, transformedObject.mutationindex);
+    const laterText = currentText.slice(transformedObject.mutationindex);
+    transformedText = frontText + transformedObject.text + laterText;
+  } else if (transformedObject.type === 'delete') {
+    const frontText = currentText.slice(0, transformedObject.mutationindex);
+    const laterText = currentText.slice(transformedObject.mutationindex + parseInt(transformedObject.length, 10));
+    transformedText = frontText + laterText;
+  }
+  console.log(": ------------------------------------------------");
+  console.log("textTransform -> transformedText", transformedText)
+  console.log(": ------------------------------------------------");
+  return transformedText;
+};
+
+module.exports = { operationTransform, fullOperationTransform, textTransform };
