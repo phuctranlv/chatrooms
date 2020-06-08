@@ -8,7 +8,7 @@ const dataObjectTransform = (fromDataSchema, toDataSchema, object, mutationid) =
   if (fromDataSchema === 'ava' && toDataSchema === 'mutationTableSchema') {
     let createdat = new Date().getTime();
     createdat = JSON.stringify(createdat);
-    const color = object.author === 'alice' ? 'rbg(0,0,255)' : 'rbg(255,0,0)'; // hard code colors for alice and bob
+    const color = object.author === 'alice' ? 'rgb(0,0,255)' : 'rgb(255,0,0)'; // hard code colors for alice and bob
     const length = object.data.length === undefined ? 'undefined' : object.data.length.toString();
     const text = object.data.text === undefined ? 'undefined' : object.data.text;
     const transformedObject = {
@@ -107,11 +107,12 @@ const insertConversation = (options, username, color, text, cb) => {
   });
 };
 
-const getAllConversations = (cb) => {
+const getAllConversations = (options, cb) => {
   cassandraDb.getAllConversations((error, result) => {
     if (error) cb(error, result);
     if (result) {
-      cb(null, dataObjectTransform('conversationTableSchema', 'ava', result.rows));
+      if (!options) return cb(null, result.rows);
+      cb(null, dataObjectTransform(options.from, options.to, result.rows));
     }
   });
 };
@@ -126,7 +127,7 @@ const deleteConversation = (id, cb) => {
 const insertConversationMutation = (mutationid, infoObject, cb) => {
   let createdat = new Date().getTime();
   createdat = JSON.stringify(createdat);
-  const color = infoObject.author === 'alice' ? 'rbg(0,0,255)' : 'rbg(255,0,0)'; // hard code colors for alice and bob
+  const color = infoObject.author === 'alice' ? 'rgb(0,0,255)' : 'rgb(255,0,0)'; // hard code colors for alice and bob
   const length = infoObject.length === undefined ? 'undefined' : infoObject.length;
   const text = infoObject.text === undefined ? 'undefined' : infoObject.text;
   const queryParams = [

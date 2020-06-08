@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
         cb();
         socket.join(user.room);
 
-        getAllConversations((getAllConversationsError, getAllConversationsResult) => {
+        getAllConversations(null, (getAllConversationsError, getAllConversationsResult) => {
           if (getAllConversationsResult) {
             const conversation = {
               username: 'Admin',
@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
               color: user.color,
               id: `${username}${this.createdat}`
             };
-            socket.emit('welcomeMessage', conversation, getAllConversationsResult.rows);
+            socket.emit('welcomeMessage', conversation, getAllConversationsResult);
           }
         });
 
@@ -111,12 +111,10 @@ io.on('connection', (socket) => {
     if (user) {
       const conversation = {
         username: 'Admin',
-        text: `${user.username} has joined!`,
+        text: `${user.username} has left!`,
         createdat: new Date().getTime(),
         color: user.color,
         id: `${user.username}${this.createdat}`,
-        mutations: [],
-        lastMutation: {}
       };
 
       io.to(user.room).emit('conversation', conversation);

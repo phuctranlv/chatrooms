@@ -57,7 +57,7 @@ router.post('/mutations', (req, res) => {
 });
 
 router.get('/conversations', (req, res) => {
-  getAllConversations((error, result) => {
+  getAllConversations({ from: 'conversationTableSchema', to: 'ava' }, (error, result) => {
     if (error) {
       res.send({
         conversations: [],

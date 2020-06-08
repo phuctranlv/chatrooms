@@ -43,7 +43,7 @@ class ConversationsPage extends React.Component {
       const promise = new Promise((resolve) => {
         this.setState({
           conversations: [
-            ...chats,
+            ...chats.sort((a, b) => a.createdat - b.createdat),
             {
               username: conversation.username,
               createdat: conversation.createdat,
