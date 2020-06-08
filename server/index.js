@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
     const user = getUser(username);
     if (!user) return;
 
-    insertConversation(username, user, text, (error, resultFromInsertConversation) => {
+    insertConversation(null, username, user.color, text, (error, resultFromInsertConversation) => {
       if (resultFromInsertConversation) {
         io.to(user.room).emit('conversation', resultFromInsertConversation);
       }
