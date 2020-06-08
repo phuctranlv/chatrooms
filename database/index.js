@@ -1,9 +1,9 @@
 const cassandra = require('cassandra-driver');
 
 let dbURL;
-process.env.DATABASE_URL ? dbURL = process.env.DATABASE_URL : dbURL = require('../setupFile').contactPoints;
+DATABASE_URL ? dbURL = DATABASE_URL : dbURL = require('../setupFile').contactPoints;
 let dataCenter;
-process.env.LOCAL_DATA_CENTER ? dataCenter = process.env.LOCAL_DATA_CENTER : dataCenter = require('../setupFile').localDataCenter;
+LOCAL_DATA_CENTER ? dataCenter = LOCAL_DATA_CENTER : dataCenter = require('../setupFile').localDataCenter;
 
 
 const client = new cassandra.Client({
