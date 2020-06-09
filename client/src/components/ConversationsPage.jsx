@@ -18,6 +18,7 @@ class ConversationsPage extends React.Component {
       username: '',
       users: [],
       recording: false,
+      editing: false,
       speakButton: '',
       recognition: window.SpeechRecognition
         ? new window.SpeechRecognition()
@@ -27,6 +28,7 @@ class ConversationsPage extends React.Component {
     this.onChangeHandler = this.onChangeHandler.bind(this);
     this.autoScroll = this.autoScroll.bind(this);
     this.onSpeakHandler = this.onSpeakHandler.bind(this);
+    this.changeEditingStatus = this.changeEditingStatus.bind(this);
 
     const { socket, socketInfo } = this.state;
 
@@ -61,30 +63,40 @@ class ConversationsPage extends React.Component {
     });
 
     socket.on('conversation', (conversation) => {
-      const { conversations } = this.state;
-      this.setState({
-        conversations: [...conversations, {
-          username: conversation.username,
-          createdat: conversation.createdat,
-          text: conversation.text,
-          color: conversation.color,
-          id: conversation.id,
-          lastmutation: conversation.lastmutation
-        }]
-      });
-      this.autoScroll();
+      const { conversations, editing } = this.state;
+      if (!editing) {
+        this.setState({
+          conversations: [...conversations, {
+            username: conversation.username,
+            createdat: conversation.createdat,
+            text: conversation.text,
+            color: conversation.color,
+            id: conversation.id,
+            lastmutation: conversation.lastmutation
+          }]
+        });
+        this.autoScroll();
+      }
     });
 
     socket.on('updateConversations', (chats) => {
-      this.setState({
-        conversations: [
-          ...chats.sort((a, b) => a.createdat - b.createdat)
-        ]
-      });
-      this.autoScroll();
+      const { editing } = this.state;
+      if (!editing) {
+        this.setState({
+          conversations: [
+            ...chats.sort((a, b) => a.createdat - b.createdat)
+          ]
+        });
+        this.autoScroll();
+      }
     });
 
-    socket.on('roomData', ({ room, users }) => this.setState({ room, users }));
+    socket.on('roomData', ({ room, users }) => {
+      const { editing } = this.state;
+      if (!editing) {
+        this.setState({ room, users });
+      }
+    });
   }
 
 
@@ -213,13 +225,20 @@ class ConversationsPage extends React.Component {
     }
   }
 
+  changeEditingStatus() {
+    this.setState((state) => {
+      const { editing } = state;
+      this.setState({ editing: !editing });
+    });
+  }
+
   render() {
     const {
-      users, conversations, conversation, room, socket, username
+      users, conversations, conversation, room, socket, username, changeEditingStatus
     } = this.state;
 
     return (
-      <div>
+      <div onClick={this.changeEditingStatus}>
         <div className="topbar">Demo for &ava</div>
         <div className="chat">
           <div className="chat__sidebar">
@@ -257,6 +276,7 @@ class ConversationsPage extends React.Component {
                   conversation={convo}
                   socket={socket}
                   username={username}
+                  changeEditingStatus={changeEditingStatus}
                 />
               ))}
             </div>

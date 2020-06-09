@@ -3,16 +3,14 @@
 import React from 'react';
 
 class Conversation extends React.Component {
-  constructor({ socket, username, conversation }) {
+  constructor({ socket, username, conversation, changeEditingStatus }) {
     super({ socket, username, conversation });
     this.state = {
       socket,
       username,
       conversation,
-      editing: false,
       cursorLocation: 0
     };
-    this.onSubmitHandler = this.onSubmitHandler.bind(this);
     this.onChangeHandler = this.onChangeHandler.bind(this);
     this.onClickTextToSpeech = this.onClickTextToSpeech.bind(this);
     this.onClickDeleteHandler = this.onClickDeleteHandler.bind(this);
@@ -32,26 +30,6 @@ class Conversation extends React.Component {
         socket.emit('typing', { username, typing: false });
       }
     });
-  }
-
-  onSubmitHandler(event) {
-    const { conversation, socket, username } = this.state;
-    event.preventDefault();
-
-    const formInput = event.target[0];
-    const submitButton = event.target[1];
-
-    submitButton.setAttribute('disabled', 'disabled');
-
-    socket.emit('sendConversation', { username, text: conversation }, (msg) => {
-      submitButton.removeAttribute('disabled');
-      formInput.focus();
-      return msg ? console.log(msg) : console.log('The conversation was delivered successfully!');
-    });
-
-    socket.emit('typing', { username, typing: false });
-
-    this.setState({ conversation: '' });
   }
 
   onClickDeleteHandler(event) {
@@ -116,6 +94,9 @@ class Conversation extends React.Component {
             <div>
               <textarea
                 id={conversation.id}
+                onFocus={this.changeEditingStatus}
+                onClick={(event) => event.stopPropagation()}
+                on
                 rows="5"
                 cols="50"
                 wrap="soft"
