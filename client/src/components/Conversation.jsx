@@ -8,7 +8,9 @@ class Conversation extends React.Component {
     this.state = {
       socket,
       username,
-      conversation
+      conversation,
+      editing: false,
+      cursorLocation: 0
     };
     this.onSubmitHandler = this.onSubmitHandler.bind(this);
     this.onChangeHandler = this.onChangeHandler.bind(this);
@@ -41,10 +43,10 @@ class Conversation extends React.Component {
 
     submitButton.setAttribute('disabled', 'disabled');
 
-    socket.emit('sendConversation', { username, text: conversation }, (conversation) => {
+    socket.emit('sendConversation', { username, text: conversation }, (msg) => {
       submitButton.removeAttribute('disabled');
       formInput.focus();
-      return conversation ? console.log(conversation) : console.log('The conversation was delivered successfully!');
+      return msg ? console.log(msg) : console.log('The conversation was delivered successfully!');
     });
 
     socket.emit('typing', { username, typing: false });
@@ -65,10 +67,6 @@ class Conversation extends React.Component {
     const favorite = event.target.parentNode.parentNode.firstChild;
     if (favorite.classList[0]) return favorite.classList.remove('favorite');
     favorite.classList.add('favorite');
-  }
-
-  onSpeakHandler(event) {
-    event.preventDefault();
   }
 
   onClickTextToSpeech(event) {

@@ -18,7 +18,6 @@ class ConversationsPage extends React.Component {
       username: '',
       users: [],
       recording: false,
-      typing: false,
       speakButton: '',
       recognition: window.SpeechRecognition
         ? new window.SpeechRecognition()
