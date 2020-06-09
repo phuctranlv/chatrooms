@@ -382,7 +382,7 @@ class ConversationsPage extends React.Component {
                               type="submit"
                               className="action-button"
                               value="🔊"
-                              onClick={this.onClickTextToSpeech} />
+                              onClick={this.onClickTextToSpeech}
                             />
                             <input
                               onClick={this.onClickDeleteHandler}

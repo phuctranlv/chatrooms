@@ -150,6 +150,11 @@ button:disabled {
 
 .action-button {
     border: 1px solid black;
+    cursor: pointer;
+}
+
+.action-button:s {
+    background-color: rgb(200, 200, 200);
 }
 
 /* Message Composition Styles */
