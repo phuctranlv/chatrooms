@@ -256,6 +256,7 @@ class ConversationsPage extends React.Component {
             <div className="chat__messages">
               {conversations.map((convo) => (
                 <Conversation
+                  key={convo.id}
                   conversation={convo}
                   socket={socket}
                   username={username}
