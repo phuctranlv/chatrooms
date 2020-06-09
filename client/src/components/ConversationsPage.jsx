@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable class-methods-use-this */
 import React from 'react';
+import Conversation from './Conversation.jsx';
 
 class ConversationsPage extends React.Component {
   constructor(props) {
@@ -27,9 +28,6 @@ class ConversationsPage extends React.Component {
     this.onChangeHandler = this.onChangeHandler.bind(this);
     this.autoScroll = this.autoScroll.bind(this);
     this.onSpeakHandler = this.onSpeakHandler.bind(this);
-    this.onClickTextToSpeech = this.onClickTextToSpeech.bind(this);
-    this.onClickDeleteHandler = this.onClickDeleteHandler.bind(this);
-    this.onClickFavoriteHandler = this.onClickFavoriteHandler.bind(this);
 
     const { socket, socketInfo } = this.state;
 
@@ -101,7 +99,7 @@ class ConversationsPage extends React.Component {
       const { speakButton, recognition } = this.state;
       const stop = () => {
         recognition.stop();
-        speakButton.textContent = '🎙';
+        speakButton.textContent = 'Speech-to-text 🎙';
         speakButton.classList.remove('speaking');
         this.setState(() => {
           const { socket, username } = this.state;
@@ -194,39 +192,8 @@ class ConversationsPage extends React.Component {
     this.setState({ conversation: '' });
   }
 
-  onClickDeleteHandler(event) {
-    const { socket, username } = this.state;
-    const { id } = event.target.parentNode.parentNode.firstChild.firstChild;
-    socket.emit('deleteConversation', { username, id }, (error) => {
-      if (error) return console.log(error);
-      console.log('The conversation is successfully deleted');
-    });
-  }
-
-  onClickFavoriteHandler(event) {
-    const favorite = event.target.parentNode.parentNode;
-    if (favorite.classList[0]) return favorite.classList.remove('favorite');
-    favorite.classList.add('favorite');
-  }
-
   onSpeakHandler(event) {
     event.preventDefault();
-  }
-
-  onClickTextToSpeech(event) {
-    const theElement = event.target.parentNode.parentNode.firstChild;
-    const toSay = event.target.parentNode.parentNode.firstChild.textContent.trim();
-    const utterance = new SpeechSynthesisUtterance(toSay);
-
-    utterance.addEventListener('start', () => {
-      theElement.classList.add('speaking');
-    });
-
-    utterance.addEventListener('end', () => {
-      theElement.addEventListener('animationiteration', () => theElement.classList.remove('speaking'), { once: true });
-    });
-
-    speechSynthesis.speak(utterance);
   }
 
   autoScroll() {
@@ -249,7 +216,7 @@ class ConversationsPage extends React.Component {
 
   render() {
     const {
-      users, conversations, conversation, room
+      users, conversations, conversation, room, socket, username
     } = this.state;
 
     return (
@@ -286,125 +253,13 @@ class ConversationsPage extends React.Component {
           </div>
           <div className="chat__main">
             <div className="chat__messages">
-              {
-                conversations.map((msg, index) => {
-                  let conversationText;
-                  const parsedTime = parseInt(msg.createdat, 10);
-                  const time = moment(parsedTime).format('h:mm a');
-                  if (msg.username === '') return;
-                  if (msg.username === 'Admin') {
-                    conversationText = (
-                      <div>
-                        <p>
-                          <span className="message__name">{msg.username}</span>
-                          <span className="message__meta">{time}</span>
-                        </p>
-                        <p>
-                          {msg.text}
-                        </p>
-                      </div>
-                    );
-                  } else if (index >= 1 && msg.username === conversations[index - 1].username) {
-                    conversationText = (
-                      <div
-                        style={{ display: 'flex' }}
-                      >
-                        <div>
-                          <textarea
-                            id={msg.id}
-                            rows="5"
-                            cols="50"
-                            wrap="soft"
-                            style={{ 'font-size': '25px', color: `${msg.color}` }}
-                          >
-                            {msg.text}
-                          </textarea>
-                        </div>
-
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column'
-                        }}
-                        >
-                          <input
-                            onClick={this.onClickFavoriteHandler}
-                            type="submit"
-                            className="action-button"
-                            value="⭐️"
-                          />
-                          <input
-                            type="submit"
-                            className="action-button"
-                            value="🔊"
-                            onClick={this.onClickTextToSpeech} />
-                          <input
-                            onClick={this.onClickDeleteHandler}
-                            type="submit"
-                            className="action-button"
-                            value="❌"
-                          />
-                        </div>
-                      </div>
-                    );
-                  } else {
-                    conversationText = (
-                      <div>
-                        <p>
-                          <span className="message__name">{msg.username}</span>
-                          <span className="message__meta">{time}</span>
-                        </p>
-                        <div
-                          style={{ display: 'flex' }}
-                        >
-                          <div>
-                            <textarea
-                              id={msg.id}
-                              rows="5"
-                              cols="50"
-                              wrap="soft"
-                              style={{ 'font-size': '25px', color: `${msg.color}` }}
-                            >
-                              {msg.text}
-                            </textarea>
-                          </div>
-                          <div style={{
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}
-                          >
-                            <input
-                              onClick={this.onClickFavoriteHandler}
-                              type="submit"
-                              className="action-button"
-                              value="⭐️"
-                            />
-                            <input
-                              type="submit"
-                              className="action-button"
-                              value="🔊"
-                              onClick={this.onClickTextToSpeech}
-                            />
-                            <input
-                              onClick={this.onClickDeleteHandler}
-                              type="submit"
-                              className="action-button"
-                              value="❌"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div
-                      className="conversation"
-                      style={{ color: `${msg.color}` }}
-                    >
-                      {conversationText}
-                    </div>
-                  );
-                })
-              }
+              {conversations.map((convo) => (
+                <Conversation
+                  conversation={convo}
+                  socket={socket}
+                  username={username}
+                />
+              ))}
             </div>
             <div className="compose">
               <form onSubmit={this.onSubmitHandler}>
