@@ -36,10 +36,10 @@ io.on('connection', (socket) => {
     addUser(socket.id, username, room, (error, user) => {
       if (error) return cb(error);
       if (user) {
-        cb();
         socket.join(user.room);
 
         getAllConversations(null, (getAllConversationsError, getAllConversationsResult) => {
+          if (getAllConversationsError) return cb(error);
           if (getAllConversationsResult) {
             const conversation = {
               username: 'Admin',
@@ -66,31 +66,36 @@ io.on('connection', (socket) => {
           room: user.room,
           users: getUsersInRoom(user.room)
         });
+
+        cb();
       }
     });
   });
 
   socket.on('sendConversation', ({ username, text }, cb) => {
     const user = getUser(username);
-    if (!user) return;
+    if (!user) return cb('invalid username:', username);
 
     insertConversation(null, username, user.color, text, (error, resultFromInsertConversation) => {
+      if (error) return cb(error);
       if (resultFromInsertConversation) {
         io.to(user.room).emit('conversation', resultFromInsertConversation);
+        cb();
       }
     });
-    cb();
   });
 
   socket.on('deleteConversation', ({ username, id }, cb) => {
     const user = getUser(username);
+    if (!user) return cb('cannot find user with username:', username);
     deleteConversation(id, (error, result) => {
-      if (error) cb(error);
+      if (error) return cb(error);
       if (result) {
         getAllConversations(null, (getAllConversationsError, getAllConversationsResult) => {
+          if (getAllConversationsError) return cb(getAllConversationsError);
           if (getAllConversationsResult) {
-            cb();
             io.to(user.room).emit('updateConversations', getAllConversationsResult);
+            cb();
           }
         });
       }
@@ -123,6 +128,7 @@ io.on('connection', (socket) => {
 
   socket.on('editing', ({ username, copyOfConversation }) => {
     const user = getUser(username);
+    if (!user) return;
     socket.broadcast.to(user.room).emit('editing', copyOfConversation);
   });
 

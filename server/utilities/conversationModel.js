@@ -109,7 +109,7 @@ const insertConversation = (options, username, color, text, cb) => {
 
 const getAllConversations = (options, cb) => {
   cassandraDb.getAllConversations((error, result) => {
-    if (error) cb(error, result);
+    if (error) cb(error, null);
     if (result) {
       if (!options) return cb(null, result.rows);
       cb(null, dataObjectTransform(options.from, options.to, result.rows));
@@ -153,9 +153,9 @@ const updateConversation = (transformedMutationObject, fullText, cb) => {
   deleteConversation(transformedMutationObject.id, (error, result) => {
     if (error) cb(error, null);
     if (result) {
-      insertConversation(transformedMutationObject, transformedMutationObject.username, transformedMutationObject.color, fullText, (error, result) => {
-        if (error) cb(error, null);
-        if (result) cb(null, result);
+      insertConversation(transformedMutationObject, transformedMutationObject.username, transformedMutationObject.color, fullText, (errorInsert, resultInsert) => {
+        if (errorInsert) cb(errorInsert, null);
+        if (resultInsert) cb(null, resultInsert);
       });
     }
   });

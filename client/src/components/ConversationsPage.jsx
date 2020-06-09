@@ -73,7 +73,6 @@ class ConversationsPage extends React.Component {
         }]
       });
       this.autoScroll();
-
     });
 
     socket.on('updateConversations', (chats) => {
@@ -141,9 +140,9 @@ class ConversationsPage extends React.Component {
 
         speechUpdatePromise.then(() => {
           const { socket, username } = this.state;
-          socket.emit('sendConversation', { username, text: speechToText }, (conversation) => (
-            conversation
-              ? console.log(conversation)
+          socket.emit('sendConversation', { username, text: speechToText }, (msg) => (
+            msg
+              ? console.log(msg)
               : console.log('The conversation was delivered successfully!')));
           speechToText = '';
         });
