@@ -121,6 +121,11 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('editing', ({ username, copyOfConversation }) => {
+    const user = getUser(username);
+    socket.broadcast.to(user.room).emit('editing', copyOfConversation);
+  });
+
   socket.on('disconnect', () => {
     const user = removeUser(socket.id);
 

@@ -4,10 +4,8 @@ import React from 'react';
 
 class Conversation extends React.Component {
   constructor({ socket, username, conversation }) {
-    super({ socket, username, conversation });
+    super(socket, username, conversation);
     this.state = {
-      socket,
-      username,
       conversation,
       cursorLocation: 0
     };
@@ -15,25 +13,31 @@ class Conversation extends React.Component {
     this.onClickTextToSpeech = this.onClickTextToSpeech.bind(this);
     this.onClickDeleteHandler = this.onClickDeleteHandler.bind(this);
     this.onClickFavoriteHandler = this.onClickFavoriteHandler.bind(this);
-  }
 
-  onChangeHandler(event) {
-    const typingPromise = new Promise((resolve) => {
-      this.setState({ conversation: event.target.value });
-      resolve(true);
-    });
-    typingPromise.then(() => {
-      const { socket, conversation, username } = this.state;
-      if (conversation !== '') {
-        socket.emit('typing', { username, typing: true });
-      } else {
-        socket.emit('typing', { username, typing: false });
+    socket.on('editing', (convo) => {
+      const { conversation } = this.state;
+      if (conversation.id === convo.id) {
+        this.setState({ conversation: convo });
       }
     });
   }
 
+  onChangeHandler(event) {
+    const { conversation } = this.state;
+    const copyOfConversation = { ...conversation };
+    copyOfConversation.text = event.target.value;
+    const typingPromise = new Promise((resolve) => {
+      this.setState({ conversation: copyOfConversation });
+      resolve(true);
+    });
+    typingPromise.then(() => {
+      const { socket, username } = this.props;
+      socket.emit('editing', { username, copyOfConversation });
+    });
+  }
+
   onClickDeleteHandler(event) {
-    const { socket, username } = this.state;
+    const { socket, username } = this.props;
     const { id } = event.target.parentNode.parentNode.firstChild.firstChild;
     socket.emit('deleteConversation', { username, id }, (error) => {
       if (error) return console.log(error);
@@ -91,20 +95,16 @@ class Conversation extends React.Component {
           <div
             style={{ display: 'flex' }}
           >
-            <div onClick={(event) => event.stopPropagation()}>
+            <div>
               <textarea
                 id={conversation.id}
-                onClick={() => {
-                  window.editing = true;
-                  console.log(window.editing);
-                }}
+                onChange={this.onChangeHandler}
                 rows="5"
                 cols="50"
                 wrap="soft"
                 style={{ 'font-size': '25px', color: `${conversation.color}` }}
-              >
-                {conversation.text}
-              </textarea>
+                value={conversation.text}
+              />
             </div>
             <div style={{
               display: 'flex',

@@ -5,8 +5,6 @@
 import React from 'react';
 import Conversation from './Conversation.jsx';
 
-let editing = false;
-
 class ConversationsPage extends React.Component {
   constructor(props) {
     super(props);
@@ -64,36 +62,31 @@ class ConversationsPage extends React.Component {
 
     socket.on('conversation', (conversation) => {
       const { conversations } = this.state;
-      if (!editing) {
-        this.setState({
-          conversations: [...conversations, {
-            username: conversation.username,
-            createdat: conversation.createdat,
-            text: conversation.text,
-            color: conversation.color,
-            id: conversation.id,
-            lastmutation: conversation.lastmutation
-          }]
-        });
-        this.autoScroll();
-      }
+      this.setState({
+        conversations: [...conversations, {
+          username: conversation.username,
+          createdat: conversation.createdat,
+          text: conversation.text,
+          color: conversation.color,
+          id: conversation.id,
+          lastmutation: conversation.lastmutation
+        }]
+      });
+      this.autoScroll();
+
     });
 
     socket.on('updateConversations', (chats) => {
-      if (!editing) {
-        this.setState({
-          conversations: [
-            ...chats.sort((a, b) => a.createdat - b.createdat)
-          ]
-        });
-        this.autoScroll();
-      }
+      this.setState({
+        conversations: [
+          ...chats.sort((a, b) => a.createdat - b.createdat)
+        ]
+      });
+      this.autoScroll();
     });
 
     socket.on('roomData', ({ room, users }) => {
-      if (!editing) {
-        this.setState({ room, users });
-      }
+      this.setState({ room, users });
     });
   }
 
@@ -229,11 +222,7 @@ class ConversationsPage extends React.Component {
     } = this.state;
 
     return (
-      <div onClick={() => {
-        if (editing) editing = false;
-        console.log(editing);
-      }}
-      >
+      <div>
         <div className="topbar">Demo for &ava</div>
         <div className="chat">
           <div className="chat__sidebar">
