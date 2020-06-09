@@ -29,6 +29,7 @@ class ConversationsPage extends React.Component {
     this.onSpeakHandler = this.onSpeakHandler.bind(this);
     this.onClickTextToSpeech = this.onClickTextToSpeech.bind(this);
     this.onClickDeleteHandler = this.onClickDeleteHandler.bind(this);
+    this.onClickFavoriteHandler = this.onClickFavoriteHandler.bind(this);
 
     const { socket, socketInfo } = this.state;
 
@@ -202,6 +203,12 @@ class ConversationsPage extends React.Component {
     });
   }
 
+  onClickFavoriteHandler(event) {
+    const favorite = event.target.parentNode.parentNode;
+    if (favorite.classList[0]) return favorite.classList.remove('favorite');
+    favorite.classList.add('favorite');
+  }
+
   onSpeakHandler(event) {
     event.preventDefault();
   }
@@ -309,7 +316,7 @@ class ConversationsPage extends React.Component {
                             cols="50"
                             wrap="soft"
                             style={{ 'font-size': '25px', color: `${msg.color}` }}
-                            >
+                          >
                             {msg.text}
                           </textarea>
                         </div>
@@ -319,11 +326,21 @@ class ConversationsPage extends React.Component {
                           flexDirection: 'column'
                         }}
                         >
-                          <input type="submit" value="⭐️" />
-                          <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
+                          <input
+                            onClick={this.onClickFavoriteHandler}
+                            type="submit"
+                            className="action-button"
+                            value="⭐️"
+                          />
+                          <input
+                            type="submit"
+                            className="action-button"
+                            value="🔊"
+                            onClick={this.onClickTextToSpeech} />
                           <input
                             onClick={this.onClickDeleteHandler}
                             type="submit"
+                            className="action-button"
                             value="❌"
                           />
                         </div>
@@ -338,7 +355,7 @@ class ConversationsPage extends React.Component {
                         </p>
                         <div
                           style={{ display: 'flex' }}
-                          >
+                        >
                           <div>
                             <textarea
                               id={msg.id}
@@ -346,7 +363,7 @@ class ConversationsPage extends React.Component {
                               cols="50"
                               wrap="soft"
                               style={{ 'font-size': '25px', color: `${msg.color}` }}
-                              >
+                            >
                               {msg.text}
                             </textarea>
                           </div>
@@ -355,13 +372,24 @@ class ConversationsPage extends React.Component {
                             flexDirection: 'column'
                           }}
                           >
-                            <input type="submit" value="⭐️" />
-                            <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
+                            <input
+                              onClick={this.onClickFavoriteHandler}
+                              type="submit"
+                              className="action-button"
+                              value="⭐️"
+                            />
+                            <input
+                              type="submit"
+                              className="action-button"
+                              value="🔊"
+                              onClick={this.onClickTextToSpeech} />
+                            />
                             <input
                               onClick={this.onClickDeleteHandler}
                               type="submit"
+                              className="action-button"
                               value="❌"
-                          />
+                            />
                           </div>
                         </div>
                       </div>

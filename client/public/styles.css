@@ -144,6 +144,14 @@ button:disabled {
     color: #0070CC;
 }
 
+.favorite {
+    box-shadow: 4px 2px 5px yellow;
+}
+
+.action-button {
+    border: 1px solid black;
+}
+
 /* Message Composition Styles */
 
 .compose {
