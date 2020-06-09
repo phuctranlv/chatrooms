@@ -57,7 +57,7 @@ io.on('connection', (socket) => {
           text: `${user.username} has joined!`,
           createdat: new Date().getTime(),
           color: user.color,
-          id: `${username}${this.createdat}`
+          id: `${this.createdat}`
         };
 
         socket.broadcast.to(user.room).emit('conversation', conversation);
@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
         text: `${user.username} has left!`,
         createdat: new Date().getTime(),
         color: user.color,
-        id: `${user.username}${this.createdat}`,
+        id: `${this.createdat}`
       };
 
       io.to(user.room).emit('conversation', conversation);

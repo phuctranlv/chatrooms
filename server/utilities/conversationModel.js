@@ -5,7 +5,7 @@ const { addUser, getUser } = require('./users');
 const cassandraDb = require('../../database/index');
 
 const dataObjectTransform = (fromDataSchema, toDataSchema, object, mutationid) => {
-  if (fromDataSchema === 'ava' && toDataSchema === 'mutationTableSchema') {
+  if (fromDataSchema === 'avaPostMutations' && toDataSchema === 'mutationTableSchema') {
     let createdat = new Date().getTime();
     createdat = JSON.stringify(createdat);
     const color = object.author === 'alice' ? 'rgb(0,0,255)' : 'rgb(255,0,0)'; // hard code colors for alice and bob
@@ -26,7 +26,7 @@ const dataObjectTransform = (fromDataSchema, toDataSchema, object, mutationid) =
     };
     return transformedObject;
   }
-  if (fromDataSchema === 'conversationTableSchema' && toDataSchema === 'ava') {
+  if (fromDataSchema === 'conversationTableSchema' && toDataSchema === 'avaGetConversations') {
     const transformedArray = [];
     for (let i = 0; i < object.length; i += 1) {
       const lastMutationObjectOfTheConversation = JSON.parse(object[i].lastmutationobject);
@@ -47,7 +47,7 @@ const dataObjectTransform = (fromDataSchema, toDataSchema, object, mutationid) =
       }
       const transformedObject = {
         author: lastMutationObjectOfTheConversation.author,
-        conversationId: lastMutationObjectOfTheConversation.id,
+        id: lastMutationObjectOfTheConversation.id,
         data,
         origin: {
           alice: parseInt(lastMutationObjectOfTheConversation.origin.alice, 10),
@@ -176,7 +176,7 @@ const mutateConversation = (mutateObject, user, cb) => {
         console.log('Finished insertConversation because this post conversationid is new. The result is:', resultInsert);
         if (errorInsert) cb(errorInsert, null);
         if (resultInsert) {
-          const newMutationObject = dataObjectTransform('ava', 'mutationTableSchema', mutateObject, 0);
+          const newMutationObject = dataObjectTransform('avaPostMutations', 'mutationTableSchema', mutateObject, 0);
           insertConversationMutation(0, newMutationObject, (errorInsertMutation, resultInsertMutation) => {
             console.log('Finished insertConversationMutation for the first time. The result is:', resultInsertMutation);
             if (errorInsertMutation) cb(errorInsertMutation, null);
@@ -196,7 +196,7 @@ const mutateConversation = (mutateObject, user, cb) => {
         console.log('Finished getAllMutationOfAConversation. The result is:', resultGettingAllMutations);
         if (resultGettingAllMutations) {
           const sortedMutationArray = resultGettingAllMutations.rows.sort((a, b) => a.mutationid - b.mutationid);
-          const newMutationObject = dataObjectTransform('ava', 'mutationTableSchema', mutateObject, sortedMutationArray.length);
+          const newMutationObject = dataObjectTransform('avaPostMutations', 'mutationTableSchema', mutateObject, sortedMutationArray.length);
           const transformedMutationObject = fullOperationTransform(newMutationObject, sortedMutationArray);
           const transformedText = textTransform(transformedMutationObject, currentText);
           insertConversationMutation(sortedMutationArray.length, transformedMutationObject, (error, result) => {
