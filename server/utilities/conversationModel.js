@@ -65,7 +65,7 @@ const insertConversation = (options, username, color, text, cb) => {
   createdat = JSON.stringify(createdat);
   let id;
   if (!options) {
-    id = `${username}${createdat}`;
+    id = createdat;
   } else if (options.id) {
     id = options.id;
   } else if (options.conversationId) {

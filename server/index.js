@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 
-const { insertConversation, getAllConversations } = require('./utilities/conversationModel');
+const { insertConversation, getAllConversations, deleteConversation } = require('./utilities/conversationModel');
 const {
   addUser, getUser, getUsersInRoom, updateUser, removeUser
 } = require('./utilities/users');
@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
               text: `Welcome ${user.username}!`,
               createdat: new Date().getTime(),
               color: user.color,
-              id: `${username}${this.createdat}`
+              id: `${this.createdat}`
             };
             socket.emit('welcomeMessage', conversation, getAllConversationsResult);
           }
@@ -80,6 +80,21 @@ io.on('connection', (socket) => {
       }
     });
     cb();
+  });
+
+  socket.on('deleteConversation', ({ username, id }, cb) => {
+    const user = getUser(username);
+    deleteConversation(id, (error, result) => {
+      if (error) cb(error);
+      if (result) {
+        getAllConversations(null, (getAllConversationsError, getAllConversationsResult) => {
+          if (getAllConversationsResult) {
+            cb();
+            io.to(user.room).emit('updateConversations', getAllConversationsResult);
+          }
+        });
+      }
+    });
   });
 
   socket.on('recording', ({ username, recording }) => {

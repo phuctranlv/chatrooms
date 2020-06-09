@@ -28,6 +28,7 @@ class ConversationsPage extends React.Component {
     this.autoScroll = this.autoScroll.bind(this);
     this.onSpeakHandler = this.onSpeakHandler.bind(this);
     this.onClickTextToSpeech = this.onClickTextToSpeech.bind(this);
+    this.onClickDeleteHandler = this.onClickDeleteHandler.bind(this);
 
     const { socket, socketInfo } = this.state;
 
@@ -72,6 +73,15 @@ class ConversationsPage extends React.Component {
           id: conversation.id,
           lastmutation: conversation.lastmutation
         }]
+      });
+      this.autoScroll();
+    });
+
+    socket.on('updateConversations', (chats) => {
+      this.setState({
+        conversations: [
+          ...chats.sort((a, b) => a.createdat - b.createdat)
+        ]
       });
       this.autoScroll();
     });
@@ -183,6 +193,15 @@ class ConversationsPage extends React.Component {
     this.setState({ conversation: '' });
   }
 
+  onClickDeleteHandler(event) {
+    const { socket, username } = this.state;
+    const { id } = event.target.parentNode.parentNode.firstChild.firstChild;
+    socket.emit('deleteConversation', { username, id }, (error) => {
+      if (error) return console.log(error);
+      console.log('The conversation is successfully deleted');
+    });
+  }
+
   onSpeakHandler(event) {
     event.preventDefault();
   }
@@ -285,11 +304,12 @@ class ConversationsPage extends React.Component {
                       >
                         <div>
                           <textarea
+                            id={msg.id}
                             rows="5"
                             cols="50"
                             wrap="soft"
                             style={{ 'font-size': '25px', color: `${msg.color}` }}
-                          >
+                            >
                             {msg.text}
                           </textarea>
                         </div>
@@ -301,7 +321,11 @@ class ConversationsPage extends React.Component {
                         >
                           <input type="submit" value="⭐️" />
                           <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
-                          <input type="submit" value="❌" />
+                          <input
+                            onClick={this.onClickDeleteHandler}
+                            type="submit"
+                            value="❌"
+                          />
                         </div>
                       </div>
                     );
@@ -314,14 +338,15 @@ class ConversationsPage extends React.Component {
                         </p>
                         <div
                           style={{ display: 'flex' }}
-                        >
+                          >
                           <div>
                             <textarea
+                              id={msg.id}
                               rows="5"
                               cols="50"
                               wrap="soft"
                               style={{ 'font-size': '25px', color: `${msg.color}` }}
-                            >
+                              >
                               {msg.text}
                             </textarea>
                           </div>
@@ -332,7 +357,11 @@ class ConversationsPage extends React.Component {
                           >
                             <input type="submit" value="⭐️" />
                             <input type="submit" value="🔊" onClick={this.onClickTextToSpeech} />
-                            <input type="submit" value="❌" />
+                            <input
+                              onClick={this.onClickDeleteHandler}
+                              type="submit"
+                              value="❌"
+                          />
                           </div>
                         </div>
                       </div>
