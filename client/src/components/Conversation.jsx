@@ -3,7 +3,7 @@
 import React from 'react';
 
 class Conversation extends React.Component {
-  constructor({ socket, username, conversation, changeEditingStatus }) {
+  constructor({ socket, username, conversation }) {
     super({ socket, username, conversation });
     this.state = {
       socket,
@@ -91,12 +91,13 @@ class Conversation extends React.Component {
           <div
             style={{ display: 'flex' }}
           >
-            <div>
+            <div onClick={(event) => event.stopPropagation()}>
               <textarea
                 id={conversation.id}
-                onFocus={this.changeEditingStatus}
-                onClick={(event) => event.stopPropagation()}
-                on
+                onClick={() => {
+                  window.editing = true;
+                  console.log(window.editing);
+                }}
                 rows="5"
                 cols="50"
                 wrap="soft"

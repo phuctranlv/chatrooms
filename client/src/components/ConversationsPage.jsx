@@ -5,6 +5,8 @@
 import React from 'react';
 import Conversation from './Conversation.jsx';
 
+let editing = false;
+
 class ConversationsPage extends React.Component {
   constructor(props) {
     super(props);
@@ -18,7 +20,6 @@ class ConversationsPage extends React.Component {
       username: '',
       users: [],
       recording: false,
-      editing: false,
       speakButton: '',
       recognition: window.SpeechRecognition
         ? new window.SpeechRecognition()
@@ -28,7 +29,6 @@ class ConversationsPage extends React.Component {
     this.onChangeHandler = this.onChangeHandler.bind(this);
     this.autoScroll = this.autoScroll.bind(this);
     this.onSpeakHandler = this.onSpeakHandler.bind(this);
-    this.changeEditingStatus = this.changeEditingStatus.bind(this);
 
     const { socket, socketInfo } = this.state;
 
@@ -63,7 +63,7 @@ class ConversationsPage extends React.Component {
     });
 
     socket.on('conversation', (conversation) => {
-      const { conversations, editing } = this.state;
+      const { conversations } = this.state;
       if (!editing) {
         this.setState({
           conversations: [...conversations, {
@@ -80,7 +80,6 @@ class ConversationsPage extends React.Component {
     });
 
     socket.on('updateConversations', (chats) => {
-      const { editing } = this.state;
       if (!editing) {
         this.setState({
           conversations: [
@@ -92,7 +91,6 @@ class ConversationsPage extends React.Component {
     });
 
     socket.on('roomData', ({ room, users }) => {
-      const { editing } = this.state;
       if (!editing) {
         this.setState({ room, users });
       }
@@ -225,20 +223,17 @@ class ConversationsPage extends React.Component {
     }
   }
 
-  changeEditingStatus() {
-    this.setState((state) => {
-      const { editing } = state;
-      this.setState({ editing: !editing });
-    });
-  }
-
   render() {
     const {
-      users, conversations, conversation, room, socket, username, changeEditingStatus
+      users, conversations, conversation, room, socket, username
     } = this.state;
 
     return (
-      <div onClick={this.changeEditingStatus}>
+      <div onClick={() => {
+        if (editing) editing = false;
+        console.log(editing);
+      }}
+      >
         <div className="topbar">Demo for &ava</div>
         <div className="chat">
           <div className="chat__sidebar">
@@ -276,7 +271,7 @@ class ConversationsPage extends React.Component {
                   conversation={convo}
                   socket={socket}
                   username={username}
-                  changeEditingStatus={changeEditingStatus}
+                  changeEditingStatus={this.changeEditingStatus}
                 />
               ))}
             </div>
