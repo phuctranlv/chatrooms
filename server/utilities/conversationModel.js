@@ -30,30 +30,47 @@ const dataObjectTransform = (fromDataSchema, toDataSchema, object, mutationid) =
     const transformedArray = [];
     for (let i = 0; i < object.length; i += 1) {
       const lastMutationObjectOfTheConversation = JSON.parse(object[i].lastmutationobject);
-      let data;
+      let transformedObject;
       if (lastMutationObjectOfTheConversation.data.type === 'insert') {
-        data = {
-          index: lastMutationObjectOfTheConversation.data.index,
-          text: lastMutationObjectOfTheConversation.data.text,
-          type: lastMutationObjectOfTheConversation.data.type
+        transformedObject = {
+          author: object[i].author,
+          id: object[i].id,
+          text: object[i].text,
+          lastMutation: {
+            author: lastMutationObjectOfTheConversation.author,
+            conversationId: lastMutationObjectOfTheConversation.id,
+            data: {
+              index: lastMutationObjectOfTheConversation.data.index,
+              text: lastMutationObjectOfTheConversation.data.text,
+              type: lastMutationObjectOfTheConversation.data.type
+            },
+            origin: {
+              alice: parseInt(lastMutationObjectOfTheConversation.origin.alice, 10),
+              bob: parseInt(lastMutationObjectOfTheConversation.origin.bob, 10)
+            }
+          }
         };
       } else {
-        data = {
-          index: lastMutationObjectOfTheConversation.data.index,
-          length: parseInt(lastMutationObjectOfTheConversation.data.length, 10),
-          text: lastMutationObjectOfTheConversation.data.text,
-          type: lastMutationObjectOfTheConversation.data.type
+        transformedObject = {
+          author: object[i].author,
+          id: object[i].id,
+          text: object[i].text,
+          lastMutation: {
+            author: lastMutationObjectOfTheConversation.author,
+            conversationId: lastMutationObjectOfTheConversation.id,
+            data: {
+              index: lastMutationObjectOfTheConversation.data.index,
+              length: parseInt(lastMutationObjectOfTheConversation.data.length, 10),
+              text: lastMutationObjectOfTheConversation.data.text,
+              type: lastMutationObjectOfTheConversation.data.type
+            },
+            origin: {
+              alice: parseInt(lastMutationObjectOfTheConversation.origin.alice, 10),
+              bob: parseInt(lastMutationObjectOfTheConversation.origin.bob, 10)
+            }
+          }
         };
       }
-      const transformedObject = {
-        author: lastMutationObjectOfTheConversation.author,
-        id: lastMutationObjectOfTheConversation.id,
-        data,
-        origin: {
-          alice: parseInt(lastMutationObjectOfTheConversation.origin.alice, 10),
-          bob: parseInt(lastMutationObjectOfTheConversation.origin.bob, 10)
-        }
-      };
       transformedArray.push(transformedObject);
     }
     return transformedArray;
