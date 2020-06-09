@@ -47,8 +47,14 @@ class Conversation extends React.Component {
 
   onClickFavoriteHandler(event) {
     const favorite = event.target.parentNode.parentNode.firstChild;
-    if (favorite.classList[0]) return favorite.classList.remove('favorite');
-    favorite.classList.add('favorite');
+    const button = event.target;
+    if (favorite.classList[0]) {
+      favorite.classList.remove('favorite');
+      button.classList.remove('action-button-selected');
+    } else {
+      favorite.classList.add('favorite');
+      button.classList.add('action-button-selected');
+    }
   }
 
   onClickTextToSpeech(event) {

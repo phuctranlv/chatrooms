@@ -157,6 +157,10 @@ button:disabled {
     background-color: rgb(200, 200, 200);
 }
 
+.action-button-selected {
+    background-color: rgb(200, 200, 200);
+}
+
 /* Message Composition Styles */
 
 .compose {
