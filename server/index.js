@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 
-const { insertConversation, getAllConversations, deleteConversation } = require('./utilities/conversationModel');
+const { insertConversation, getAllConversations, deleteConversation, updateConversation } = require('./utilities/conversationModel');
 const {
   addUser, getUser, getUsersInRoom, updateUser, removeUser
 } = require('./utilities/users');
@@ -129,7 +129,13 @@ io.on('connection', (socket) => {
   socket.on('editing', ({ username, copyOfConversation }) => {
     const user = getUser(username);
     if (!user) return;
-    socket.broadcast.to(user.room).emit('editing', copyOfConversation);
+    updateConversation(copyOfConversation, copyOfConversation.text, (error, result) => {
+      if (error) console.log('There was an error updating the conversation:', error);
+      if (result) {
+        console.log('successfully updated conversation')
+        socket.broadcast.to(user.room).emit('editing', result);
+      };
+    });
   });
 
   socket.on('disconnect', () => {

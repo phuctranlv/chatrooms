@@ -237,5 +237,6 @@ module.exports = {
   insertConversation,
   getAllConversations,
   deleteConversation,
-  mutateConversation
+  mutateConversation,
+  updateConversation
 };
