@@ -13,7 +13,7 @@ CREATE TABLE conversations (
   color varchar,
   lastmutationid int,
   lastmutationobject VARCHAR,
-  PRIMARY KEY (id, createdat)
+  PRIMARY KEY (id)
 );
 
 CREATE TABLE mutations (
