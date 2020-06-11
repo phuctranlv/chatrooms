@@ -12,7 +12,7 @@ const SignInModal = (props) => {
         <section className={styles.modalMain} onClick={(event) => event.stopPropagation()}>
           <div className="centered-form">
             <div className="centered-form__box">
-              <h1>Join</h1>
+              <h1>Choose a display name to join</h1>
               <form action="/conversations.html">
                 <label>Display name</label>
                 <input type="text" name="username" placeholder="Display name" required />
